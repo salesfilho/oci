@@ -6,26 +6,23 @@
 package br.prof.salesfilho.oci.view.graph;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.math3.util.Precision;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -56,27 +53,41 @@ public class Graph extends ApplicationFrame {
         setContentPane(chartPanel);
     }
 
-//    private XYDataset createDataset() {
-//        collectionDataset = new XYSeriesCollection();
-//        return collectionDataset;
-//    }
-
     public void addSeire(double[] values, String serieName) {
         final XYSeries serie = new XYSeries(serieName);
         for (int i = 0; i < values.length; i++) {
-            serie.add( i, Precision.round(values[i], 2));
+            serie.add(i, Precision.round(values[i], 2));
         }
         collectionDataset.addSeries(serie);
-        updateChart();
     }
 
-    private void updateChart(){
-        this.dataSet = this.collectionDataset;
-        this.chart = createChart();
+    public void createCombinedChart(Map<String, double[]> mapSeries, String legendTitle) {
+        XYSeriesCollection xds;
+        final CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis(legendTitle));
+        plot.setGap(10.0);
+        for (Map.Entry<String, double[]> entrySet : mapSeries.entrySet()) {
+            String serieName = entrySet.getKey();
+            double[] values = entrySet.getValue();
+
+            final XYSeries series = new XYSeries(serieName);
+            for (int i = 0; i < values.length; i++) {
+                series.add(i, Precision.round(values[i], 2));
+            }
+            xds = new XYSeriesCollection();
+            xds.addSeries(series);
+
+            final XYItemRenderer renderer = new StandardXYItemRenderer();
+            final NumberAxis rangeAxis = new NumberAxis(serieName);
+            final XYPlot subplot = new XYPlot(xds, null, rangeAxis, renderer);
+            subplot.setRangeAxisLocation(AxisLocation.BOTTOM_OR_LEFT);
+            plot.add(subplot);
+
+        }
+        this.chart = new JFreeChart(this.title, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
         chartPanel.setChart(chart);
     }
-    
-    public JFreeChart createChart() {
+
+    public void createChart() {
         chart = ChartFactory.createXYLineChart(
                 this.title,
                 this.xLabel,
@@ -97,13 +108,10 @@ public class Graph extends ApplicationFrame {
 //        renderer.setSeriesLinesVisible(1, false);
 //        renderer.setSeriesShapesVisible(1, false);
 //        plot.setRenderer(renderer);
-
         // change the auto tick unit selection to integer units only...
         final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         // OPTIONAL CUSTOMISATION COMPLETED.
-
-        return chart;
     }
 
 //    public void saveGraphAsPNG(String fileName) {

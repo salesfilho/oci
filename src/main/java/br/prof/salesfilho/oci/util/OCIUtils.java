@@ -62,7 +62,7 @@ public class OCIUtils {
         for (int i = 0; i < complexTransInput.length; i++) {
             double real = (complexTransInput[i].getReal());
             double img = (complexTransInput[i].getImaginary());
-            input[i] = Math.sqrt((Math.pow(real, 2) + Math.pow(img, 2)));
+            input[i] = (Math.pow(real, 2) + Math.pow(img, 2));
         }
         return input;
     }
@@ -92,6 +92,21 @@ public class OCIUtils {
             energyNormalydedSignal[i] = signal[i] / Math.sqrt(signalEnergy);
         }
         return energyNormalydedSignal;
+    }
+
+    /**
+     * @param signal input signal
+     * @precond signal != null
+     * @return Normalyzed array for max element
+     */
+    public static double[] normalyzedMaxArray(double[] signal) {
+        double[] normalyzedArray = new double[signal.length];
+        double max = maxElement(signal);
+        for (int i = 0; i < signal.length; i++) {
+            //normalyzedArray[i] = signal[i] / Math.sqrt(max);
+            normalyzedArray[i] = signal[i] / max;
+        }
+        return normalyzedArray;
     }
 
     /**
@@ -139,6 +154,18 @@ public class OCIUtils {
         }
 
         return meanResult;
+    }
+
+    /**
+     * @param input double[] input array
+     * @return max value element
+     */
+    public static double maxElement(double[] input) {
+        double max = 0;
+        for (int i = 0; i < input.length; i++) {
+            max = Math.max(max, input[i]);
+        }
+        return max;
     }
 
     public static int nextPowerOfTwo(int sizeOf) {
