@@ -18,11 +18,11 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ImageRgbProcessor {
+public class ImageProcessor {
 
     private BufferedImage image;
 
-    public ImageRgbProcessor(BufferedImage srcImage) {
+    public ImageProcessor(BufferedImage srcImage) {
         this.image = srcImage;
     }
 

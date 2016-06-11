@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.prof.salesfilho.oci.view.graph;
+package br.prof.salesfilho.oci.image;
 
 import java.awt.Color;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
@@ -22,7 +21,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.xy.XYDataItem;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -34,7 +33,7 @@ import org.jfree.ui.ApplicationFrame;
  */
 @Getter
 @Setter
-public class Graph extends ApplicationFrame {
+public class GraphicBuilder extends ApplicationFrame {
 
     private String title;
     private String xLabel;
@@ -44,7 +43,7 @@ public class Graph extends ApplicationFrame {
     private JFreeChart chart;
     private ChartPanel chartPanel;
 
-    public Graph(final String title) {
+    public GraphicBuilder(final String title) {
         super(title);
         this.title = title;
         dataSet = collectionDataset = new XYSeriesCollection();
@@ -78,6 +77,7 @@ public class Graph extends ApplicationFrame {
 
             final XYItemRenderer renderer = new StandardXYItemRenderer();
             final NumberAxis rangeAxis = new NumberAxis(serieName);
+
             final XYPlot subplot = new XYPlot(xds, null, rangeAxis, renderer);
             subplot.setRangeAxisLocation(AxisLocation.BOTTOM_OR_LEFT);
             plot.add(subplot);
@@ -92,7 +92,7 @@ public class Graph extends ApplicationFrame {
                 this.title,
                 this.xLabel,
                 this.yLabel,
-                getDataSet(),
+                this.collectionDataset,
                 PlotOrientation.VERTICAL,
                 true, true, false);
 
@@ -104,13 +104,24 @@ public class Graph extends ApplicationFrame {
         plot.setDomainGridlinePaint(Color.white);
         plot.setRangeGridlinePaint(Color.white);
 
-//        final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-//        renderer.setSeriesLinesVisible(1, false);
-//        renderer.setSeriesShapesVisible(1, false);
-//        plot.setRenderer(renderer);
+        final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+        //final XYStepRenderer renderer = new XYStepRenderer();
+
+        List<XYSeries> listSeries = collectionDataset.getSeries();
+        for (int i = 0; i < listSeries.size(); i++) {
+            renderer.setSeriesLinesVisible(i, true);
+            renderer.setSeriesShapesVisible(i, true);
+            renderer.setSeriesShapesFilled(i, false);
+            renderer.setDrawSeriesLineAsPath(true);
+        }
+
+        plot.setRenderer(renderer);
+        plot.setRangePannable(true);
         // change the auto tick unit selection to integer units only...
         final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        chartPanel.setChart(chart);
+
         // OPTIONAL CUSTOMISATION COMPLETED.
     }
 
@@ -121,9 +132,9 @@ public class Graph extends ApplicationFrame {
 //            ChartUtilities.writeChartAsPNG(fos, createChart(), 1024, 512);
 //            fos.close();
 //        } catch (FileNotFoundException ex) {
-//            Logger.getLogger(Graph.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(GraphicBuilder.class.getName()).log(Level.SEVERE, null, ex);
 //        } catch (IOException ex) {
-//            Logger.getLogger(Graph.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(GraphicBuilder.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //    }
 //
@@ -137,7 +148,7 @@ public class Graph extends ApplicationFrame {
 //            imageInByte = baos.toByteArray();
 //            baos.close();
 //        } catch (IOException ex) {
-//            Logger.getLogger(Graph.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(GraphicBuilder.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //        return imageInByte;
 //    }

@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.prof.salesfilho.oci.normalizer;
+package br.prof.salesfilho.oci.service;
 
-import br.prof.salesfilho.oci.image.ImageRgbProcessor;
+import br.prof.salesfilho.oci.image.ImageProcessor;
 import br.prof.salesfilho.oci.util.OCIUtils;
-import br.prof.salesfilho.oci.view.graph.Graph;
+import br.prof.salesfilho.oci.image.GraphicBuilder;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  * @author salesfilho
  */
 @Component
-public class ImageNormalizer {
+public class ImageNormalizerService {
 
     @Getter
     @Setter
@@ -61,7 +61,8 @@ public class ImageNormalizer {
         //this.combinedPlot(computeCorrentropy(), "Gráfico de Correntropia de todas as imagens", "Correntropia");
         //this.combinedPlot(computeRGBCorrentropy(getFirstImageFromList()), "Correntropia dos canais RGB", "Correntropia");
         //this.combinedPlot(computeFftOfCorrentropy(getFirstImageFromList()), "FFT da correntropia dos canais RGB", "FFT");
-        this.combinedPlot(computeMagnitudeOfOfCorrentropy(getFirstImageFromList()), "Magnitude dos canais RGB", "Magnitude");
+        //this.combinedPlot(computeMagnitudeOfCorrentropy(getFirstImageFromList()), "Magnitude dos canais RGB", "Magnitude");
+        this.singlePlot(computeMagnitudeOfCorrentropy(getFirstImageFromList()), "Magnitude dos canais RGB");
     }
 
     public BufferedImage getFirstImageFromList() {
@@ -69,7 +70,7 @@ public class ImageNormalizer {
         try {
             img = ImageIO.read(new File(fileList.get(1)));
         } catch (IOException ex) {
-            Logger.getLogger(ImageNormalizer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ImageNormalizerService.class.getName()).log(Level.SEVERE, null, ex);
         }
         return img;
     }
@@ -80,15 +81,15 @@ public class ImageNormalizer {
         for (String fileName : fileList) {
             try {
                 System.out.println("Processing: " + fileName);
-                ImageRgbProcessor imageRgbProcessor;
+                ImageProcessor imageRgbProcessor;
                 BufferedImage img = ImageIO.read(new File(fileName));
-                imageRgbProcessor = new ImageRgbProcessor(img);
+                imageRgbProcessor = new ImageProcessor(img);
                 img = imageRgbProcessor.resize(DEFAULT_RESIZED_IMAGE_SIZE, DEFAULT_RESIZED_IMAGE_SIZE);
                 ImageIO.write(img, "jpg", new File(DESTINATION_FILE_PATH + i + ".jpg"));
                 i++;
 
             } catch (IOException ex) {
-                Logger.getLogger(ImageNormalizer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ImageNormalizerService.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -99,14 +100,14 @@ public class ImageNormalizer {
         for (String fileName : fileList) {
             try {
                 BufferedImage originalImage = ImageIO.read(new File(fileName));
-                ImageRgbProcessor imageRgbProcessor = new ImageRgbProcessor(originalImage);
+                ImageProcessor imageRgbProcessor = new ImageProcessor(originalImage);
                 double[][] colorMatrix = OCIUtils.convertIntMatrixToDoubleMatrix(imageRgbProcessor.getRedMatrix());
                 double[] vetorImage = OCIUtils.vetorizeEntropySequence(colorMatrix);
                 double[] correntropy = OCIUtils.computeAutoCorrentropy(vetorImage, KERNEL_SIZE);
                 resultMap.put("Imagem-" + i, correntropy);
                 i++;
             } catch (IOException ex) {
-                Logger.getLogger(ImageNormalizer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ImageNormalizerService.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return resultMap;
@@ -116,7 +117,7 @@ public class ImageNormalizer {
         Map<String, double[]> resultMap = new HashMap<>();
         List<double[]> listCorrentropy = new ArrayList<>();
 
-        ImageRgbProcessor imageRgbProcessor = new ImageRgbProcessor(originalImage);
+        ImageProcessor imageRgbProcessor = new ImageProcessor(originalImage);
         double[][] colorMatrix = OCIUtils.convertIntMatrixToDoubleMatrix(imageRgbProcessor.getRedMatrix());
         double[] vetorImage = OCIUtils.vetorizeEntropySequence(colorMatrix);
         double[] normalyzed = OCIUtils.computEnergyVector(vetorImage);
@@ -153,51 +154,52 @@ public class ImageNormalizer {
         Map<String, double[]> resultMap = new HashMap<>();
         List<double[]> listCorrentropy = new ArrayList<>();
 
-        ImageRgbProcessor imageRgbProcessor = new ImageRgbProcessor(originalImage);
+        ImageProcessor imageRgbProcessor = new ImageProcessor(originalImage);
         double[][] colorMatrix = OCIUtils.convertIntMatrixToDoubleMatrix(imageRgbProcessor.getRedMatrix());
         double[] vetorImage = OCIUtils.vetorizeEntropySequence(colorMatrix);
         double[] correntropy = OCIUtils.computeAutoCorrentropy(vetorImage, KERNEL_SIZE);
         double[] fft = OCIUtils.fft_forward_double(correntropy);
         resultMap.put("Red", fft);
-//        listCorrentropy.add(fft);
-//
-//        colorMatrix = OCIUtils.convertIntMatrixToDoubleMatrix(imageRgbProcessor.getGreenMatrix());
-//        vetorImage = OCIUtils.vetorizeEntropySequence(colorMatrix);
-//        correntropy = OCIUtils.computeAutoCorrentropy(vetorImage, KERNEL_SIZE);
-//        fft = OCIUtils.fft_forward_double(correntropy);
-//        resultMap.put("Green", fft);
-//        listCorrentropy.add(fft);
-//
-//        colorMatrix = OCIUtils.convertIntMatrixToDoubleMatrix(imageRgbProcessor.getBlueMatrix());
-//        vetorImage = OCIUtils.vetorizeEntropySequence(colorMatrix);
-//        correntropy = OCIUtils.computeAutoCorrentropy(vetorImage, KERNEL_SIZE);
-//        fft = OCIUtils.fft_forward_double(correntropy);
-//        resultMap.put("Blue", fft);
-//        listCorrentropy.add(fft);
-//
-//        colorMatrix = OCIUtils.convertIntMatrixToDoubleMatrix(imageRgbProcessor.getGrayScaleMatrix());
-//        vetorImage = OCIUtils.vetorizeEntropySequence(colorMatrix);
-//        correntropy = OCIUtils.computeAutoCorrentropy(vetorImage, KERNEL_SIZE);
-//        fft = OCIUtils.fft_forward_double(correntropy);
-//        resultMap.put("Gray Scale", fft);
-//
-//        double[] vetorAvg = OCIUtils.avarage(listCorrentropy);
-//
-//        resultMap.put("Avg (R+G+B)/3", vetorAvg);
+        listCorrentropy.add(fft);
+
+        colorMatrix = OCIUtils.convertIntMatrixToDoubleMatrix(imageRgbProcessor.getGreenMatrix());
+        vetorImage = OCIUtils.vetorizeEntropySequence(colorMatrix);
+        correntropy = OCIUtils.computeAutoCorrentropy(vetorImage, KERNEL_SIZE);
+        fft = OCIUtils.fft_forward_double(correntropy);
+        resultMap.put("Green", fft);
+        listCorrentropy.add(fft);
+
+        colorMatrix = OCIUtils.convertIntMatrixToDoubleMatrix(imageRgbProcessor.getBlueMatrix());
+        vetorImage = OCIUtils.vetorizeEntropySequence(colorMatrix);
+        correntropy = OCIUtils.computeAutoCorrentropy(vetorImage, KERNEL_SIZE);
+        fft = OCIUtils.fft_forward_double(correntropy);
+        resultMap.put("Blue", fft);
+        listCorrentropy.add(fft);
+
+        colorMatrix = OCIUtils.convertIntMatrixToDoubleMatrix(imageRgbProcessor.getGrayScaleMatrix());
+        vetorImage = OCIUtils.vetorizeEntropySequence(colorMatrix);
+        correntropy = OCIUtils.computeAutoCorrentropy(vetorImage, KERNEL_SIZE);
+        fft = OCIUtils.fft_forward_double(correntropy);
+        resultMap.put("Gray Scale", fft);
+
+        double[] vetorAvg = OCIUtils.avarage(listCorrentropy);
+
+        resultMap.put("Avg (R+G+B)/3", vetorAvg);
 
         return resultMap;
     }
-    public Map<String, double[]> computeMagnitudeOfOfCorrentropy(BufferedImage originalImage) {
+
+    public Map<String, double[]> computeMagnitudeOfCorrentropy(BufferedImage originalImage) {
         Map<String, double[]> resultMap = new HashMap<>();
         List<double[]> listCorrentropy = new ArrayList<>();
 
-        ImageRgbProcessor imageRgbProcessor = new ImageRgbProcessor(originalImage);
+        ImageProcessor imageRgbProcessor = new ImageProcessor(originalImage);
         double[][] colorMatrix = OCIUtils.convertIntMatrixToDoubleMatrix(imageRgbProcessor.getRedMatrix());
         double[] vetorImage = OCIUtils.vetorizeEntropySequence(colorMatrix);
         double[] correntropy = OCIUtils.computeAutoCorrentropy(vetorImage, KERNEL_SIZE);
         double[] magnitude_fft = OCIUtils.fft_magnitude(correntropy);
         resultMap.put("Red", magnitude_fft);
- //       listCorrentropy.add(magnitude_fft);
+//        listCorrentropy.add(magnitude_fft);
 //
 //        colorMatrix = OCIUtils.convertIntMatrixToDoubleMatrix(imageRgbProcessor.getGreenMatrix());
 //        vetorImage = OCIUtils.vetorizeEntropySequence(colorMatrix);
@@ -218,16 +220,14 @@ public class ImageNormalizer {
 //        correntropy = OCIUtils.computeAutoCorrentropy(vetorImage, KERNEL_SIZE);
 //        magnitude_fft = OCIUtils.fft_magnitude(correntropy);
 //        resultMap.put("Gray Scale", magnitude_fft);
-
-        //double[] vetorAvg = OCIUtils.avarage(listCorrentropy);
-
-        //resultMap.put("Avg (R+G+B)/3", vetorAvg);
-
-        return resultMap;
+//
+//        double[] vetorAvg = OCIUtils.avarage(listCorrentropy);
+//        resultMap.put("Avg (R+G+B)/3", vetorAvg);
+       return resultMap;
     }
 
     public void combinedPlot(Map<String, double[]> dataMap, String title, String legend) {
-        final Graph g1 = new Graph(title);
+        final GraphicBuilder g1 = new GraphicBuilder(title);
         g1.createCombinedChart(dataMap, legend);
         g1.pack();
         RefineryUtilities.centerFrameOnScreen(g1);
@@ -235,10 +235,15 @@ public class ImageNormalizer {
 
     }
 
-    public void singlePlot(Map<String, double[]> dataMap) {
+    public void singlePlot(Map<String, double[]> dataMap, String title) {
 
-        final Graph g1 = new Graph("Gráficos de correntropia");
-        g1.createCombinedChart(dataMap, "Correntropia");
+        final GraphicBuilder g1 = new GraphicBuilder(title);
+        for (Map.Entry<String, double[]> entrySet : dataMap.entrySet()) {
+            String key = entrySet.getKey();
+            double[] value = entrySet.getValue();
+            g1.addSeire(value, key);
+        }
+        g1.createChart();
         g1.pack();
         RefineryUtilities.centerFrameOnScreen(g1);
         g1.setVisible(true);
@@ -247,7 +252,7 @@ public class ImageNormalizer {
 
     public void normalyze198() {
         int x = 1;
-        ImageRgbProcessor imageRgbProcessor;
+        ImageProcessor imageRgbProcessor;
         for (String fileName : OCIUtils.getImageFiles(this.inputDir)) {
             System.out.println("File:" + fileName);
 
@@ -257,7 +262,7 @@ public class ImageNormalizer {
                     x = 2;
 
                     BufferedImage originalImage = ImageIO.read(new File(this.inputDir + "/" + fileName));
-                    imageRgbProcessor = new ImageRgbProcessor(originalImage);
+                    imageRgbProcessor = new ImageProcessor(originalImage);
                     originalImage = imageRgbProcessor.resize(DEFAULT_RESIZED_IMAGE_SIZE, DEFAULT_RESIZED_IMAGE_SIZE);
 
                     /*
@@ -284,7 +289,7 @@ public class ImageNormalizer {
                      double[] fft_correntropyEnergyVetorizedImage = ci.getAutoCorrentropyFromEnergyVetorizedImage();
                      double[] magnitude = OCIUtils.fft_magnitude(fft_correntropyEnergyVetorizedImage);
 
-                     Graph g1 = new Graph("Imagem vetorizada");
+                     GraphicBuilder g1 = new GraphicBuilder("Imagem vetorizada");
                      g1.addSeire(vt, "Vetorização");
                      g1.setXLabel("Amostras");
                      g1.setYLabel("Valor");
@@ -292,7 +297,7 @@ public class ImageNormalizer {
                      RefineryUtilities.centerFrameOnScreen(g1);
                      g1.setVisible(true);
 
-                     Graph gEnergia = new Graph("Energia da Imagem vetorizada");
+                     GraphicBuilder gEnergia = new GraphicBuilder("Energia da Imagem vetorizada");
                      gEnergia.addSeire(vtEnergia, "Energia");
                      gEnergia.setXLabel("Amostras");
                      gEnergia.setYLabel("Valor");
@@ -300,7 +305,7 @@ public class ImageNormalizer {
                      RefineryUtilities.centerFrameOnScreen(gEnergia);
                      gEnergia.setVisible(true);
 
-                     Graph g2 = new Graph("Autocorrentropia da imagem vetorizada");
+                     GraphicBuilder g2 = new GraphicBuilder("Autocorrentropia da imagem vetorizada");
                      g2.addSeire(autoCorrentropyVetorizedImage, "Autocorrentropia da imagem");
                      g2.setXLabel("Amostras");
                      g2.setYLabel("Valor");
@@ -308,7 +313,7 @@ public class ImageNormalizer {
                      RefineryUtilities.centerFrameOnScreen(g2);
                      g2.setVisible(true);
 
-                     Graph g_vetorEnergia = new Graph("Autocorrentropia da energia da imagem vetorizada");
+                     GraphicBuilder g_vetorEnergia = new GraphicBuilder("Autocorrentropia da energia da imagem vetorizada");
                      g_vetorEnergia.addSeire(autoCorrentropyEnergyVetorizedImage, "Autocorrentropia da energia");
                      g_vetorEnergia.setXLabel("Amostras");
                      g_vetorEnergia.setYLabel("Valor");
@@ -316,13 +321,13 @@ public class ImageNormalizer {
                      RefineryUtilities.centerFrameOnScreen(g_vetorEnergia);
                      g_vetorEnergia.setVisible(true);
 
-                     Graph g3 = new Graph("Transformada de Fourrier da Autocorrentropia de imagem");
+                     GraphicBuilder g3 = new GraphicBuilder("Transformada de Fourrier da Autocorrentropia de imagem");
                      g3.addSeire(fft_correntropyEnergyVetorizedImage, "FFT");
                      g3.pack();
                      RefineryUtilities.centerFrameOnScreen(g3);
                      g3.setVisible(true);
 
-                     Graph g4 = new Graph("Magnitude da Transformada de Fourrier da Autocorrentropia");
+                     GraphicBuilder g4 = new GraphicBuilder("Magnitude da Transformada de Fourrier da Autocorrentropia");
                      g4.addSeire(magnitude, "Magnitude");
                      g4.pack();
                      RefineryUtilities.centerFrameOnScreen(g4);
@@ -353,7 +358,7 @@ public class ImageNormalizer {
 //                    ImagePlus f5 = new ImagePlus("fft_correntropy", g5.getGraphAsBufferedImage());
 //                    f5.show();
                 } catch (IOException ex) {
-                    Logger.getLogger(ImageNormalizer.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ImageNormalizerService.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }

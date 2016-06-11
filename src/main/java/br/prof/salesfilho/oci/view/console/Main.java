@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.prof.salesfilho.oci;
+package br.prof.salesfilho.oci.view.console;
 
-import br.prof.salesfilho.oci.extractor.ImageFeatureExtractor;
-import br.prof.salesfilho.oci.normalizer.ImageNormalizer;
+import br.prof.salesfilho.oci.service.ImageNormalizerService;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import javax.annotation.PostConstruct;
@@ -25,10 +24,7 @@ import org.springframework.stereotype.Component;
 public class Main {
 
     @Autowired
-    private ImageNormalizer imageNormalizer;
-
-    @Autowired
-    private ImageFeatureExtractor imageFeatureExtractor;
+    private ImageNormalizerService imageNormalizer;
 
     @Autowired
     private ApplicationArguments applicationArguments;
@@ -71,13 +67,13 @@ public class Main {
     public void extractFeatures() {
 
         if (this.propertySource.containsProperty("workDir")) {
-            imageFeatureExtractor.setWorkDir(this.propertySource.getProperty("workDir").toString());
+            //imageFeatureExtractor.setWorkDir(this.propertySource.getProperty("workDir").toString());
 
         } else {
             this.start = false;
         }
         if (this.start) {
-            imageFeatureExtractor.start();
+            //imageFeatureExtractor.start();
         } else {
             usage();
         }
