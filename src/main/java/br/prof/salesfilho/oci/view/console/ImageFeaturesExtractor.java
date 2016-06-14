@@ -130,9 +130,9 @@ public class ImageFeaturesExtractor {
         descriptor.setDescription("Descriptor for ".concat(label));
         
         descriptor.setRedAvgChannel(OCIUtils.avarage(listRedChannelFeatures));
-        descriptor.setRedAvgChannel(OCIUtils.avarage(listGreenChannelFeatures));
-        descriptor.setRedAvgChannel(OCIUtils.avarage(listBlueChannelFeatures));
-        descriptor.setRedAvgChannel(OCIUtils.avarage(listGrayScaleChannelFeatures));
+        descriptor.setGreenAvgChannel(OCIUtils.avarage(listGreenChannelFeatures));
+        descriptor.setBlueAvgChannel(OCIUtils.avarage(listBlueChannelFeatures));
+        descriptor.setGrayScaleAvgChannel(OCIUtils.avarage(listGrayScaleChannelFeatures));
         descriptor.setAvgRgbChannel(OCIUtils.avarage(listRgbAvgFeatures));
 
         //Save to XML Database 
