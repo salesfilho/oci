@@ -6,6 +6,7 @@
 package br.prof.salesfilho.oci.view.console;
 
 import br.prof.salesfilho.oci.service.ImageNormalizerService;
+import br.prof.salesfilho.oci.service.ImageWomanBustClassifier;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import javax.annotation.PostConstruct;
@@ -27,9 +28,17 @@ public class Main {
     private ImageNormalizerService imageNormalizer;
 
     @Autowired
+    private ImageFeaturesExtractor featureExtractor;
+    
+    @Autowired
+    private ImageWomanBustClassifier classifier;
+
+    @Autowired
     private ApplicationArguments applicationArguments;
     @Getter
     private PropertySource propertySource;
+
+    private static final double KERNEL_SIZE = 0.15;
 
     private boolean start = true;
 
@@ -37,6 +46,9 @@ public class Main {
     public void init() throws FileNotFoundException, IOException {
         propertySource = new SimpleCommandLinePropertySource(applicationArguments.getSourceArgs());
 
+        if (this.propertySource.containsProperty("classify")) {
+            this.classify();
+        }
         if (this.propertySource.containsProperty("normalyze")) {
             this.startNormalyze();
         }
@@ -50,9 +62,9 @@ public class Main {
 
     public void startNormalyze() {
 
-        if (this.propertySource.containsProperty("inputDir") && this.propertySource.containsProperty("workDir")) {
+        if (this.propertySource.containsProperty("inputDir") && this.propertySource.containsProperty("outputDir")) {
             imageNormalizer.setInputDir(this.propertySource.getProperty("inputDir").toString());
-            imageNormalizer.setOutputDir(this.propertySource.getProperty("workDir").toString());
+            imageNormalizer.setOutputDir(this.propertySource.getProperty("outputDir").toString());
 
         } else {
             this.start = false;
@@ -66,14 +78,34 @@ public class Main {
 
     public void extractFeatures() {
 
-        if (this.propertySource.containsProperty("workDir")) {
-            //imageFeatureExtractor.setWorkDir(this.propertySource.getProperty("workDir").toString());
+        if (this.propertySource.containsProperty("inputDir") && this.propertySource.containsProperty("outputDir")) {
+            featureExtractor.setInputDir(this.propertySource.getProperty("inputDir").toString());
+            featureExtractor.setOutputDir(this.propertySource.getProperty("outputDir").toString());
+            featureExtractor.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
+            featureExtractor.setDescriptorType(Integer.valueOf(this.propertySource.getProperty("type").toString()));
+            featureExtractor.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
 
         } else {
             this.start = false;
         }
         if (this.start) {
-            //imageFeatureExtractor.start();
+            featureExtractor.start();
+        } else {
+            usage();
+        }
+    }
+    public void classify() {
+
+        if (this.propertySource.containsProperty("inputDir") ) {
+            classifier.setInputDir(this.propertySource.getProperty("inputDir").toString());
+            classifier.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
+            classifier.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
+
+        } else {
+            this.start = false;
+        }
+        if (this.start) {
+            classifier.start();
         } else {
             usage();
         }
@@ -85,9 +117,9 @@ public class Main {
         System.out.println("Usage: java -jar oci<version>.jar options");
         System.out.println("Main Options: --normalyze && --extractFeatures");
         System.out.println("");
-        System.out.println("Ex.: normalyze: java -jar oci.jar --normalyze --inputDir=/tmp/in --workDir=/tmp/out");
-        System.out.println("Ex.: extractFeatures: java -jar oci.jar --extractFeatures --workDir=/tmp/out");
-        System.out.println("Ex.: normalyze and extractFeatures: java -jar oci.jar --normalyze --extractFeatures --inputDir=/tmp/in --workDir=/tmp/out");
+        System.out.println("Ex.: normalyze: java -jar oci.jar --normalyze --inputDir=/tmp/in --outputDir=/tmp/out");
+        System.out.println("Ex.: extractFeatures: java -jar oci.jar --extractFeatures kernelsize=0.15 --type=1 --inputDir=/tmp/in --outputDir=/tmp/out");
+        System.out.println("Ex.: normalyze and extractFeatures: java -jar oci.jar --normalyze --extractFeatures --inputDir=/tmp/in --outputDir=/tmp/out");
         System.out.println("");
 
         System.out.println("------------------------------------------------------------------------------------");

@@ -21,6 +21,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLine3DRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -68,14 +69,17 @@ public class GraphicBuilder extends ApplicationFrame {
             String serieName = entrySet.getKey();
             double[] values = entrySet.getValue();
 
+            final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+
             final XYSeries series = new XYSeries(serieName);
             for (int i = 0; i < values.length; i++) {
                 series.add(i, Precision.round(values[i], 2));
+                renderer.setSeriesVisible(i, true, true);
+                renderer.setSeriesShapesVisible(i, true);
             }
             xds = new XYSeriesCollection();
             xds.addSeries(series);
 
-            final XYItemRenderer renderer = new StandardXYItemRenderer();
             final NumberAxis rangeAxis = new NumberAxis(serieName);
 
             final XYPlot subplot = new XYPlot(xds, null, rangeAxis, renderer);
@@ -105,14 +109,12 @@ public class GraphicBuilder extends ApplicationFrame {
         plot.setRangeGridlinePaint(Color.white);
 
         final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-        //final XYStepRenderer renderer = new XYStepRenderer();
 
         List<XYSeries> listSeries = collectionDataset.getSeries();
         for (int i = 0; i < listSeries.size(); i++) {
             renderer.setSeriesLinesVisible(i, true);
             renderer.setSeriesShapesVisible(i, true);
             renderer.setSeriesShapesFilled(i, false);
-            renderer.setDrawSeriesLineAsPath(true);
         }
 
         plot.setRenderer(renderer);
@@ -122,7 +124,6 @@ public class GraphicBuilder extends ApplicationFrame {
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         chartPanel.setChart(chart);
 
-        // OPTIONAL CUSTOMISATION COMPLETED.
     }
 
 //    public void saveGraphAsPNG(String fileName) {

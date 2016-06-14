@@ -5,6 +5,7 @@
  */
 package br.prof.salesfilho.oci.domain;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import lombok.Setter;
  * @author salesfilho
  */
 @NoArgsConstructor
+@EqualsAndHashCode
 public class ImageDescriptor {
 
     @Getter
@@ -30,31 +32,37 @@ public class ImageDescriptor {
 
     @Getter
     @Setter
-    private double[] redChannel;
+    private double[] redAvgChannel;
 
     @Getter
     @Setter
-    private double[] greenChannel;
+    private double[] greenAvgChannel;
 
     @Getter
     @Setter
-    private double[] blueChannel;
+    private double[] blueAvgChannel;
 
     @Getter
     @Setter
-    private double[] rgbChannel;
+    private double[] avgRgbChannel;
 
     @Getter
     @Setter
-    private double[] grayScaleChannel;
+    private double[] grayScaleAvgChannel;
+    
 
+    public static final int CHANNEL_RED = 1;
+    public static final int CHANNEL_GREEN = 2;
+    public static final int CHANNEL_BLUE = 3;
+    public static final int CHANNEL_GRAYSCALE = 3;
+    
     public ImageDescriptor(int id, String label, double[] redChannel, double[] greenChannel, double[] blueChannel, double[] rgbChannel, double[] grayScaleChannel) {
         this.id = id;
         this.label = label;
-        this.redChannel = redChannel;
-        this.greenChannel = greenChannel;
-        this.blueChannel = blueChannel;
-        this.rgbChannel = rgbChannel;
-        this.grayScaleChannel = grayScaleChannel;
+        this.redAvgChannel = redChannel;
+        this.greenAvgChannel = greenChannel;
+        this.blueAvgChannel = blueChannel;
+        this.avgRgbChannel = rgbChannel;
+        this.grayScaleAvgChannel = grayScaleChannel;
     }
 }

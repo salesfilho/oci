@@ -99,11 +99,10 @@ public class OCIUtils {
      * @precond signal != null
      * @return Normalyzed array for max element
      */
-    public static double[] normalyzedMaxArray(double[] signal) {
+    public static double[] maxElementArrayNormalyze(double[] signal) {
         double[] normalyzedArray = new double[signal.length];
         double max = maxElement(signal);
         for (int i = 0; i < signal.length; i++) {
-            //normalyzedArray[i] = signal[i] / Math.sqrt(max);
             normalyzedArray[i] = signal[i] / max;
         }
         return normalyzedArray;
@@ -196,7 +195,7 @@ public class OCIUtils {
         return result;
     }
 
-    public static double[] vetorizeEntropySequence(double[][] source) {
+    public static double[] vetorizeWithSpatialEntropySequence(double[][] source) {
 
         List<double[][]> splited = splitMatrix(source, 2);
 
