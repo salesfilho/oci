@@ -10,7 +10,6 @@ import br.prof.salesfilho.oci.util.OCIUtils;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import lombok.Setter;
 import org.apache.commons.math3.ml.distance.EuclideanDistance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import sun.security.util.Cache;
 
 /**
  *
@@ -60,30 +58,44 @@ public class ImageWomanBustClassifier {
 
     public void start() {
         fileList = OCIUtils.getImageFiles(this.inputDir);
-        System.out.println(this.euclidianHardDistanceClassify());
+        System.out.println("******************** CLASSIFICATION SUMMARY ********************");
+        for (Map.Entry<String, String> entrySet : this.euclidianDistanceHardClassify().entrySet()) {
+            String key = entrySet.getKey();
+            String value = entrySet.getValue();
+            System.out.println("File: " + key);
+            System.out.println("Is nude bust ...: " + value);
+        }
+        System.out.println("****************************************************************");
     }
 
-    public String euclidianHardDistanceClassify() {
+    public Map<String, String> euclidianDistanceVeryHardClassify() {
         EuclideanDistance euclideanDistance = new EuclideanDistance();
+
         Map<String, Double> noNudeBustDistanceList = new HashMap<>();
         Map<String, Double> nudeBustDistanceList = new HashMap<>();
 
+        Map<String, String> result = new HashMap<>();
+
+        imageDescriptorService.openDatabase(new File(this.databaseName));
+        List<ImageDescriptor> nudeBustList = imageDescriptorService.findAllWomanNudeBust();
+        List<ImageDescriptor> noNudeBustList = imageDescriptorService.findAllWomanNonNudeBust();
+
         for (String imagePath : fileList) {
             try {
-                System.out.println("Extracting classify features from: ".concat(imagePath));
                 this.image = ImageIO.read(new File(imagePath));
 
             } catch (IOException ex) {
                 Logger.getLogger(ImageNormalizerService.class.getName()).log(Level.SEVERE, null, ex);
             }
 
+            System.out.println("Extracting classify features from: ".concat(imagePath));
+
             double[] dataRedChannel = imageDescriptorService.magnitude(this.image, ImageDescriptor.CHANNEL_RED, this.kernelSize);
             double[] dataGreenChannel = imageDescriptorService.magnitude(this.image, ImageDescriptor.CHANNEL_GREEN, this.kernelSize);
             double[] dataBlueChannel = imageDescriptorService.magnitude(this.image, ImageDescriptor.CHANNEL_BLUE, this.kernelSize);
             double[] dataGrayScaleChannel = imageDescriptorService.magnitude(this.image, ImageDescriptor.CHANNEL_GRAYSCALE, this.kernelSize);
 
-            imageDescriptorService.openDatabase(new File(this.databaseName));
-            List<ImageDescriptor> nudeBustList = imageDescriptorService.findAllWomanNudeBust();
+            System.out.println("Computing Euclidian distance for nude bust images... ");
 
             for (ImageDescriptor descritor : nudeBustList) {
                 nudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedAvgChannel()));
@@ -92,34 +104,115 @@ public class ImageWomanBustClassifier {
                 nudeBustDistanceList.put("GrayScale", euclideanDistance.compute(dataGrayScaleChannel, descritor.getGrayScaleAvgChannel()));
             }
 
-            List<ImageDescriptor> noNudeBustList = imageDescriptorService.findAllWomanNonNudeBust();
-
+            System.out.println("Computing Euclidian distance for NON nude bust images... ");
             for (ImageDescriptor descritor : noNudeBustList) {
                 noNudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedAvgChannel()));
                 noNudeBustDistanceList.put("Green", euclideanDistance.compute(dataGreenChannel, descritor.getGreenAvgChannel()));
                 noNudeBustDistanceList.put("Blue", euclideanDistance.compute(dataBlueChannel, descritor.getBlueAvgChannel()));
                 noNudeBustDistanceList.put("GrayScale", euclideanDistance.compute(dataGrayScaleChannel, descritor.getGrayScaleAvgChannel()));
             }
+
+            /* Calculate and classify */
+            double yes = 0;
+            double no = 0;
+
+            for (Map.Entry<String, Double> entrySet : nudeBustDistanceList.entrySet()) {
+                String key = entrySet.getKey();
+                Double value = entrySet.getValue();
+
+                System.out.println("Nude bust test --> Euclidian distance for " + key + " channel: " + value);
+                yes += value;
+            }
+            for (Map.Entry<String, Double> entrySet : noNudeBustDistanceList.entrySet()) {
+                String key = entrySet.getKey();
+                Double value = entrySet.getValue();
+
+                System.out.println("No nude bust test --> Euclidian distance for " + key + " channel: " + value);
+                no += value;
+            }
+            System.out.println("YES score..: " + yes);
+            System.out.println("NO score...: " + no);
+
+            result.put(imagePath, (yes >= no ? "Yes" : "No"));
+
+            /* Clear lists for next step */
+            noNudeBustDistanceList.clear();
+            nudeBustDistanceList.clear();
+
         }
 
-        double yes = 0;
-        double no = 0;
+        return result;
+    }
+    public Map<String, String> euclidianDistanceHardClassify() {
+        EuclideanDistance euclideanDistance = new EuclideanDistance();
 
-        for (Map.Entry<String, Double> entrySet : nudeBustDistanceList.entrySet()) {
-            String key = entrySet.getKey();
-            Double value = entrySet.getValue();
+        Map<String, Double> noNudeBustDistanceList = new HashMap<>();
+        Map<String, Double> nudeBustDistanceList = new HashMap<>();
 
-            System.out.println("Nude bust test --> Euclidian distance for " + key + " channel: " + value);
-            yes += value;
+        Map<String, String> result = new HashMap<>();
+
+        imageDescriptorService.openDatabase(new File(this.databaseName));
+        List<ImageDescriptor> nudeBustList = imageDescriptorService.findAllWomanNudeBust();
+        List<ImageDescriptor> noNudeBustList = imageDescriptorService.findAllWomanNonNudeBust();
+
+        for (String imagePath : fileList) {
+            try {
+                this.image = ImageIO.read(new File(imagePath));
+
+            } catch (IOException ex) {
+                Logger.getLogger(ImageNormalizerService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            System.out.println("Extracting classify features from: ".concat(imagePath));
+
+            double[] dataRedChannel = imageDescriptorService.magnitude(this.image, ImageDescriptor.CHANNEL_RED, this.kernelSize);
+            double[] dataGreenChannel = imageDescriptorService.magnitude(this.image, ImageDescriptor.CHANNEL_GREEN, this.kernelSize);
+            double[] dataBlueChannel = imageDescriptorService.magnitude(this.image, ImageDescriptor.CHANNEL_BLUE, this.kernelSize);
+
+            System.out.println("Computing Euclidian distance for nude bust images... ");
+
+            for (ImageDescriptor descritor : nudeBustList) {
+                nudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedAvgChannel()));
+                nudeBustDistanceList.put("Green", euclideanDistance.compute(dataGreenChannel, descritor.getGreenAvgChannel()));
+                nudeBustDistanceList.put("Blue", euclideanDistance.compute(dataBlueChannel, descritor.getBlueAvgChannel()));
+            }
+
+            System.out.println("Computing Euclidian distance for NON nude bust images... ");
+            for (ImageDescriptor descritor : noNudeBustList) {
+                noNudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedAvgChannel()));
+                noNudeBustDistanceList.put("Green", euclideanDistance.compute(dataGreenChannel, descritor.getGreenAvgChannel()));
+                noNudeBustDistanceList.put("Blue", euclideanDistance.compute(dataBlueChannel, descritor.getBlueAvgChannel()));
+            }
+
+            /* Calculate and classify */
+            double yes = 0;
+            double no = 0;
+
+            for (Map.Entry<String, Double> entrySet : nudeBustDistanceList.entrySet()) {
+                String key = entrySet.getKey();
+                Double value = entrySet.getValue();
+
+                System.out.println("Nude bust test --> Euclidian distance for " + key + " channel: " + value);
+                yes += value;
+            }
+            for (Map.Entry<String, Double> entrySet : noNudeBustDistanceList.entrySet()) {
+                String key = entrySet.getKey();
+                Double value = entrySet.getValue();
+
+                System.out.println("No nude bust test --> Euclidian distance for " + key + " channel: " + value);
+                no += value;
+            }
+            System.out.println("YES score..: " + yes);
+            System.out.println("NO score...: " + no);
+
+            result.put(imagePath, (yes <= no ? "Yes" : "No"));
+
+            /* Clear lists for next step */
+            noNudeBustDistanceList.clear();
+            nudeBustDistanceList.clear();
+
         }
-        for (Map.Entry<String, Double> entrySet : noNudeBustDistanceList.entrySet()) {
-            String key = entrySet.getKey();
-            Double value = entrySet.getValue();
 
-            System.out.println("No nude bust test --> Euclidian distance for " + key + " channel: " + value);
-            no += value;
-        }
-
-        return (yes >= no ? "Yes" : "No");
+        return result;
     }
 }

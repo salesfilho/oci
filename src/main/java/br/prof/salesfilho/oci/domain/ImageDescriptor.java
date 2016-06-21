@@ -54,7 +54,7 @@ public class ImageDescriptor {
     public static final int CHANNEL_RED = 1;
     public static final int CHANNEL_GREEN = 2;
     public static final int CHANNEL_BLUE = 3;
-    public static final int CHANNEL_GRAYSCALE = 3;
+    public static final int CHANNEL_GRAYSCALE = 4;
     
     public ImageDescriptor(int id, String label, double[] redChannel, double[] greenChannel, double[] blueChannel, double[] rgbChannel, double[] grayScaleChannel) {
         this.id = id;

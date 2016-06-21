@@ -55,7 +55,9 @@ public class Main {
         if (this.propertySource.containsProperty("extractFeatures")) {
             this.extractFeatures();
         }
-        if (!(this.propertySource.containsProperty("normalyze") || this.propertySource.containsProperty("extractFeatures"))) {
+        if (!(this.propertySource.containsProperty("classify") || 
+                this.propertySource.containsProperty("normalyze")||
+                this.propertySource.containsProperty("extractFeatures"))) {
             this.usage();
         }
     }
