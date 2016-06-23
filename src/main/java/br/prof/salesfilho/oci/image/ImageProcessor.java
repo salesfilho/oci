@@ -9,6 +9,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,7 +27,7 @@ public class ImageProcessor {
     @Getter
     @Setter
     private BufferedImage image;
-    
+
     public ImageProcessor(BufferedImage srcImage) {
         this.image = srcImage;
     }
@@ -156,6 +158,23 @@ public class ImageProcessor {
         g2d.dispose();
         this.image = dimg;
         return this.image;
+    }
+
+    public List<BufferedImage> getSubImages(int size) {
+
+        if (this.image.getWidth() % size != 0 || this.image.getHeight() % size != 0 ) {
+            throw new ArrayIndexOutOfBoundsException("Image size and input size cause array index out of bounds!");
+        }
+
+        List<BufferedImage> result = new ArrayList<>();
+        BufferedImage subImage;
+        for (int i = 0; i < this.image.getWidth(); i = i + size) {
+            for (int j = 0; j < this.image.getHeight(); j = j + size) {
+                subImage = image.getSubimage(i, j, size, size);
+                result.add(subImage);
+            }
+        }
+        return result;
     }
 
 }

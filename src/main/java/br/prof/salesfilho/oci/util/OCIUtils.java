@@ -216,7 +216,7 @@ public class OCIUtils {
      * @precond chunksize > 0 && larger != null
      * @throws ArrayIndexOutOfBoundsException, NullPointerException
      */
-    private static List<double[][]> splitMatrix(double[][] larger, int subArraySize) throws
+    public static List<double[][]> splitMatrix(double[][] larger, int subArraySize) throws
             ArrayIndexOutOfBoundsException, NullPointerException {
         if (subArraySize <= 0) {
             throw new ArrayIndexOutOfBoundsException("Chunks must be atleast 1x1");
@@ -349,6 +349,13 @@ public class OCIUtils {
         double[] result = new double[input.length];
         for (int i = 0; i < input.length; i++) {
             result[i] = (double) input[i];
+        }
+        return result;
+    }
+    public static int[] convertDoubleArray2IntArray(double[] input) {
+        int[] result = new int[input.length];
+        for (int i = 0; i < input.length; i++) {
+            result[i] = (int) input[i];
         }
         return result;
     }
