@@ -218,7 +218,7 @@ public class BodyWomanDescriptorFeatureExtractor {
                 imageFeaturesMap = imageProcessorService.getImageFeaturesMap(img, kernelSize);
 
                 listRedChannelFeatures.add(imageFeaturesMap.get("red"));
-                listGreenChannelFeatures.add(imageFeaturesMap.get("grenn"));
+                listGreenChannelFeatures.add(imageFeaturesMap.get("green"));
                 listBlueChannelFeatures.add(imageFeaturesMap.get("blue"));
                 listGrayScaleChannelFeatures.add(imageFeaturesMap.get("gray"));
                 listRgbAvgFeatures.add(imageFeaturesMap.get("avg"));

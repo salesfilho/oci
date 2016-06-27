@@ -66,8 +66,8 @@ public class BodyWomanNudeClassifier {
             try {
                 System.out.println("Classifying: ".concat(imagePath));
                 BufferedImage img = ImageIO.read(new File(imagePath));
-                boolean classification = classify(img, 128, kernelSize);
-                 System.out.println("Classification: " + classification);
+                boolean classification = classify(img, 64, kernelSize);
+                System.out.println("Classification: " + classification);
             } catch (IOException ex) {
                 Logger.getLogger(BodyWomanNudeClassifier.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -81,7 +81,6 @@ public class BodyWomanNudeClassifier {
         double umbilicusMatch = 0;
         double buttockMatch = 0;
         double genitalMatch = 0;
-        double totalMatch = 0;
 
         Map<String, double[]> imgInputFeaures;
 
@@ -90,38 +89,28 @@ public class BodyWomanNudeClassifier {
         for (BufferedImage img : partImageList) {
             imgInputFeaures = imageProcessorService.getImageFeaturesMap(img, kernelSize);
 
-            if (hasMatch("face", imgInputFeaures)) {
-                faceMatch++;
-            }
-            if (hasMatch("chest", imgInputFeaures)) {
-                chestMatch++;
-            }
-            if (hasMatch("umbilicus", imgInputFeaures)) {
-                umbilicusMatch++;
-            }
-            if (hasMatch("buttock", imgInputFeaures)) {
-                buttockMatch++;
-            }
-            if (hasMatch("genital", imgInputFeaures)) {
-                genitalMatch++;
-            }
+            faceMatch += computeMatch("face", imgInputFeaures);
+            chestMatch += computeMatch("chest", imgInputFeaures);
+            umbilicusMatch += computeMatch("umbilicus", imgInputFeaures);
+            buttockMatch += computeMatch("buttock", imgInputFeaures);
+            genitalMatch += computeMatch("genital", imgInputFeaures);
 
         }
-        totalMatch = chestMatch + umbilicusMatch + (buttockMatch*2) + (genitalMatch*3);
-        
+        double totalMatch = chestMatch + umbilicusMatch + (buttockMatch * 1) + (genitalMatch * 1);
+
         System.out.println("------------------- Matchs results ---------------------");
         System.out.println("Faces....: " + faceMatch);
         System.out.println("Chest....: " + chestMatch);
         System.out.println("Umbilicus: " + umbilicusMatch);
         System.out.println("Buttock..: " + buttockMatch);
         System.out.println("Genital..: " + genitalMatch);
-        System.out.println("Total..: " + totalMatch);
+        System.out.println("Total....: chestMatch + umbilicusMatch + buttockMatch  + genitalMatch = " + totalMatch);
         System.out.println("-----------------------------------");
 
         return totalMatch >= 3;
     }
 
-    private boolean hasMatch(String name, Map<String, double[]> imgInputFeaures) {
+    private int computeMatch(String name, Map<String, double[]> imgInputFeaures) {
 
         EuclideanDistance euclideanDistance = new EuclideanDistance();
         //double[] redChanellDescriptor = imgInputFeaures.get("red");
@@ -133,14 +122,10 @@ public class BodyWomanNudeClassifier {
         BodyPartDescriptor nudeBodyPartDescriptor = bodyWomanDescriptorService.findNudeBodyPartDescriptorByName(name);
         BodyPartDescriptor notNudeBodyPartDescriptor = bodyWomanDescriptorService.findNotNudeBodyPartDescriptorByName(name);
 
-        System.out.println("-----------------------------------");
-        System.out.println(name.concat(" analyze..."));
-        System.out.println("-----------------------------------");
-
         double nudeDistance = euclideanDistance.compute(avgChanellDescriptor, nudeBodyPartDescriptor.getAvgChannel());
         double notNudeDistance = euclideanDistance.compute(avgChanellDescriptor, notNudeBodyPartDescriptor.getAvgChannel());
 
-        return (nudeDistance <= notNudeDistance);
+        return (nudeDistance <= notNudeDistance) ? 1 : 0;
 
     }
 
