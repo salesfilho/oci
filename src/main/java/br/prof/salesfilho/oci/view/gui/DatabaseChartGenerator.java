@@ -34,8 +34,8 @@ public class DatabaseChartGenerator {
 
         Map<String, double[]> dataMap = new HashMap<>();
         for (ImageDescriptor descritor : nudeBustList) {
-            dataMap.put("Avarage RGB channel", descritor.getAvgRgbChannel());
-            dataMap.put("RED channel", descritor.getRedAvgChannel());
+            dataMap.put("Avarage RGB channel", descritor.getAvgChannel());
+            dataMap.put("RED channel", descritor.getRedChannel());
             if (true) {
                 break;
             }
@@ -46,8 +46,8 @@ public class DatabaseChartGenerator {
 
         dataMap = new HashMap<>();
         for (ImageDescriptor descritor : nonNuudeBustList) {
-            dataMap.put("Avarage RGB channel", descritor.getAvgRgbChannel());
-            dataMap.put("RED channel", descritor.getRedAvgChannel());
+            dataMap.put("Avarage RGB channel", descritor.getAvgChannel());
+            dataMap.put("RED channel", descritor.getRedChannel());
             if (true) {
                 break;
             }

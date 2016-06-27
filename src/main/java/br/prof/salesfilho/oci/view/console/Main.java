@@ -5,6 +5,7 @@
  */
 package br.prof.salesfilho.oci.view.console;
 
+import br.prof.salesfilho.oci.service.BodyWomanNudeClassifier;
 import br.prof.salesfilho.oci.service.ImageNormalizerService;
 import br.prof.salesfilho.oci.service.ImageWomanBustClassifier;
 import java.io.FileNotFoundException;
@@ -29,9 +30,15 @@ public class Main {
 
     @Autowired
     private ImageFeaturesExtractor featureExtractor;
+
+    @Autowired
+    private BodyWomanDescriptorFeatureExtractor womanDescriptorFeatureExtractor;
     
     @Autowired
     private ImageWomanBustClassifier classifier;
+
+    @Autowired
+    private BodyWomanNudeClassifier bodyWomanNudeClassifier;
 
     @Autowired
     private ApplicationArguments applicationArguments;
@@ -81,17 +88,22 @@ public class Main {
     public void extractFeatures() {
 
         if (this.propertySource.containsProperty("inputDir") && this.propertySource.containsProperty("outputDir")) {
-            featureExtractor.setInputDir(this.propertySource.getProperty("inputDir").toString());
-            featureExtractor.setOutputDir(this.propertySource.getProperty("outputDir").toString());
-            featureExtractor.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
-            featureExtractor.setDescriptorType(Integer.valueOf(this.propertySource.getProperty("type").toString()));
-            featureExtractor.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
+            womanDescriptorFeatureExtractor.setInputDir(this.propertySource.getProperty("inputDir").toString());
+            womanDescriptorFeatureExtractor.setOutputDir(this.propertySource.getProperty("outputDir").toString());
+            womanDescriptorFeatureExtractor.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
+            womanDescriptorFeatureExtractor.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
 
+//            featureExtractor.setInputDir(this.propertySource.getProperty("inputDir").toString());
+//            featureExtractor.setOutputDir(this.propertySource.getProperty("outputDir").toString());
+//            featureExtractor.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
+//            featureExtractor.setDescriptorType(Integer.valueOf(this.propertySource.getProperty("type").toString()));
+//            featureExtractor.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
+//
         } else {
             this.start = false;
         }
         if (this.start) {
-            featureExtractor.start();
+            womanDescriptorFeatureExtractor.start();
         } else {
             usage();
         }
@@ -99,15 +111,15 @@ public class Main {
     public void classify() {
 
         if (this.propertySource.containsProperty("inputDir") ) {
-            classifier.setInputDir(this.propertySource.getProperty("inputDir").toString());
-            classifier.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
-            classifier.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
+            bodyWomanNudeClassifier.setInputDir(this.propertySource.getProperty("inputDir").toString());
+            bodyWomanNudeClassifier.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
+            bodyWomanNudeClassifier.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
 
         } else {
             this.start = false;
         }
         if (this.start) {
-            classifier.start();
+            bodyWomanNudeClassifier.start();
         } else {
             usage();
         }

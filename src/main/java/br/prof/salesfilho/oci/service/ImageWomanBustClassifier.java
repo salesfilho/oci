@@ -98,18 +98,18 @@ public class ImageWomanBustClassifier {
             System.out.println("Computing Euclidian distance for nude bust images... ");
 
             for (ImageDescriptor descritor : nudeBustList) {
-                nudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedAvgChannel()));
-                nudeBustDistanceList.put("Green", euclideanDistance.compute(dataGreenChannel, descritor.getGreenAvgChannel()));
-                nudeBustDistanceList.put("Blue", euclideanDistance.compute(dataBlueChannel, descritor.getBlueAvgChannel()));
-                nudeBustDistanceList.put("GrayScale", euclideanDistance.compute(dataGrayScaleChannel, descritor.getGrayScaleAvgChannel()));
+                nudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedChannel()));
+                nudeBustDistanceList.put("Green", euclideanDistance.compute(dataGreenChannel, descritor.getGreenChannel()));
+                nudeBustDistanceList.put("Blue", euclideanDistance.compute(dataBlueChannel, descritor.getBlueChannel()));
+                nudeBustDistanceList.put("GrayScale", euclideanDistance.compute(dataGrayScaleChannel, descritor.getGrayScaleChannel()));
             }
 
             System.out.println("Computing Euclidian distance for NON nude bust images... ");
             for (ImageDescriptor descritor : noNudeBustList) {
-                noNudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedAvgChannel()));
-                noNudeBustDistanceList.put("Green", euclideanDistance.compute(dataGreenChannel, descritor.getGreenAvgChannel()));
-                noNudeBustDistanceList.put("Blue", euclideanDistance.compute(dataBlueChannel, descritor.getBlueAvgChannel()));
-                noNudeBustDistanceList.put("GrayScale", euclideanDistance.compute(dataGrayScaleChannel, descritor.getGrayScaleAvgChannel()));
+                noNudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedChannel()));
+                noNudeBustDistanceList.put("Green", euclideanDistance.compute(dataGreenChannel, descritor.getGreenChannel()));
+                noNudeBustDistanceList.put("Blue", euclideanDistance.compute(dataBlueChannel, descritor.getBlueChannel()));
+                noNudeBustDistanceList.put("GrayScale", euclideanDistance.compute(dataGrayScaleChannel, descritor.getGrayScaleChannel()));
             }
 
             /* Calculate and classify */
@@ -143,6 +143,7 @@ public class ImageWomanBustClassifier {
 
         return result;
     }
+
     public Map<String, String> euclidianDistanceHardClassify() {
         EuclideanDistance euclideanDistance = new EuclideanDistance();
 
@@ -172,16 +173,16 @@ public class ImageWomanBustClassifier {
             System.out.println("Computing Euclidian distance for nude bust images... ");
 
             for (ImageDescriptor descritor : nudeBustList) {
-                nudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedAvgChannel()));
-                nudeBustDistanceList.put("Green", euclideanDistance.compute(dataGreenChannel, descritor.getGreenAvgChannel()));
-                nudeBustDistanceList.put("Blue", euclideanDistance.compute(dataBlueChannel, descritor.getBlueAvgChannel()));
+                nudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedChannel()));
+                nudeBustDistanceList.put("Green", euclideanDistance.compute(dataGreenChannel, descritor.getGreenChannel()));
+                nudeBustDistanceList.put("Blue", euclideanDistance.compute(dataBlueChannel, descritor.getBlueChannel()));
             }
 
             System.out.println("Computing Euclidian distance for NON nude bust images... ");
             for (ImageDescriptor descritor : noNudeBustList) {
-                noNudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedAvgChannel()));
-                noNudeBustDistanceList.put("Green", euclideanDistance.compute(dataGreenChannel, descritor.getGreenAvgChannel()));
-                noNudeBustDistanceList.put("Blue", euclideanDistance.compute(dataBlueChannel, descritor.getBlueAvgChannel()));
+                noNudeBustDistanceList.put("Red", euclideanDistance.compute(dataRedChannel, descritor.getRedChannel()));
+                noNudeBustDistanceList.put("Green", euclideanDistance.compute(dataGreenChannel, descritor.getGreenChannel()));
+                noNudeBustDistanceList.put("Blue", euclideanDistance.compute(dataBlueChannel, descritor.getBlueChannel()));
             }
 
             /* Calculate and classify */

@@ -105,22 +105,4 @@ public class DescriptorDAO {
         return this.database.getWomanNudeBust();
     }
 
-    public ImageDescriptor findAWomanNonNudeBustById(int id) {
-        for (ImageDescriptor womanNonNudeBust : this.database.getWomanNonNudeBust()) {
-            if (womanNonNudeBust.getId() == id) {
-                return womanNonNudeBust;
-            }
-        }
-        return null;
-    }
-
-    public ImageDescriptor findAWomanNudeBustById(int id) {
-        for (ImageDescriptor womanNudeBust : this.database.getWomanNudeBust()) {
-            if (womanNudeBust.getId() == id) {
-                return womanNudeBust;
-            }
-        }
-        return null;
-    }
-
 }

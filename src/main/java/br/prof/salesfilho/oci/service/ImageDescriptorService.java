@@ -64,14 +64,6 @@ public class ImageDescriptorService {
         return dao.findAllWomanNudeBust();
     }
 
-    public ImageDescriptor findAWomanNonNudeBustById(int id) {
-        return dao.findAWomanNonNudeBustById(id);
-    }
-
-    public ImageDescriptor findAWomanNudeBustById(int id) {
-        return dao.findAWomanNudeBustById(id);
-    }
-
     /**
      * @param image input image (signal)
      * @param width
@@ -179,7 +171,7 @@ public class ImageDescriptorService {
      * @param channel RGB and grayscale (1 = RED, 2 = GREEN, 3 = BLUE and 4 =
      * GRAYSCALE, diferent value GRAYSCALE is returned)
      * @param kernel Kernel size
-     * @return magnitude/modulo = fft(autocorrentropia)) as array
+     * @return getMagnitude/modulo = fft(autocorrentropia)) as array
      */
     public double[] magnitude(BufferedImage image, int channel, double kernel) {
         double[] result = this.autoCorrentropy(image, channel, kernel);
@@ -196,7 +188,7 @@ public class ImageDescriptorService {
     /**
      * @param signal
      * @param kernel Kernel size
-     * @return magnitude/modulo = fft(autocorrentropia)) as array
+     * @return getMagnitude/modulo = fft(autocorrentropia)) as array
      */
     public double[] magnitude(double[] signal,  double kernel) {
         double[] result = this.autoCorrentropy(signal, kernel);
