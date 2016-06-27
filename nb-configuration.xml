@@ -9,8 +9,7 @@ Without this configuration present, some functionality in the IDE may be limited
     <config-data xmlns="http://www.netbeans.org/ns/maven-config-data/1">
         <configurations>
             <configuration id="Classify" profiles=""/>
-            <configuration id="Extract_NON_Nude_Features" profiles=""/>
-            <configuration id="Extract_Nude_Features" profiles=""/>
+            <configuration id="Extract_Features" profiles=""/>
         </configurations>
     </config-data>
 </project-shared-configuration>

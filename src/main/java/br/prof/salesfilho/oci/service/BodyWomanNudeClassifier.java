@@ -66,7 +66,8 @@ public class BodyWomanNudeClassifier {
             try {
                 System.out.println("Classifying: ".concat(imagePath));
                 BufferedImage img = ImageIO.read(new File(imagePath));
-                classify(img, 64, kernelSize);
+                boolean classification = classify(img, 128, kernelSize);
+                 System.out.println("Classification: " + classification);
             } catch (IOException ex) {
                 Logger.getLogger(BodyWomanNudeClassifier.class.getName()).log(Level.SEVERE, null, ex);
             }
