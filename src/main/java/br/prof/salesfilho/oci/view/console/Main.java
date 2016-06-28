@@ -5,8 +5,10 @@
  */
 package br.prof.salesfilho.oci.view.console;
 
+import br.prof.salesfilho.oci.service.BodyWomanDescriptorService;
 import br.prof.salesfilho.oci.service.BodyWomanNudeClassifier;
 import br.prof.salesfilho.oci.service.ImageNormalizerService;
+import br.prof.salesfilho.oci.service.ImageProcessorService;
 import br.prof.salesfilho.oci.service.ImageWomanBustClassifier;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,6 +28,12 @@ import org.springframework.stereotype.Component;
 public class Main {
 
     @Autowired
+    private BodyWomanDescriptorService bodyWomanDescriptorService;
+
+    @Autowired
+    private ImageProcessorService imageProcessorService;
+
+    @Autowired
     private ImageNormalizerService imageNormalizer;
 
     @Autowired
@@ -33,7 +41,7 @@ public class Main {
 
     @Autowired
     private BodyWomanDescriptorFeatureExtractor womanDescriptorFeatureExtractor;
-    
+
     @Autowired
     private ImageWomanBustClassifier classifier;
 
@@ -62,9 +70,9 @@ public class Main {
         if (this.propertySource.containsProperty("extractFeatures")) {
             this.extractFeatures();
         }
-        if (!(this.propertySource.containsProperty("classify") || 
-                this.propertySource.containsProperty("normalyze")||
-                this.propertySource.containsProperty("extractFeatures"))) {
+        if (!(this.propertySource.containsProperty("classify")
+                || this.propertySource.containsProperty("normalyze")
+                || this.propertySource.containsProperty("extractFeatures"))) {
             this.usage();
         }
     }
@@ -93,6 +101,17 @@ public class Main {
             womanDescriptorFeatureExtractor.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
             womanDescriptorFeatureExtractor.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
 
+            BodyWomanFeatureExtractorExecutor e1 = new BodyWomanFeatureExtractorExecutor(bodyWomanDescriptorService, imageProcessorService, true);
+            Thread t1 = new Thread(e1);
+            t1.start();;
+
+            BodyWomanFeatureExtractorExecutor e2 = new BodyWomanFeatureExtractorExecutor(bodyWomanDescriptorService, imageProcessorService, false);
+            Thread t2 = new Thread(e2);
+            t2.start();
+
+
+
+
 //            featureExtractor.setInputDir(this.propertySource.getProperty("inputDir").toString());
 //            featureExtractor.setOutputDir(this.propertySource.getProperty("outputDir").toString());
 //            featureExtractor.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
@@ -103,14 +122,15 @@ public class Main {
             this.start = false;
         }
         if (this.start) {
-            womanDescriptorFeatureExtractor.start();
+            //womanDescriptorFeatureExtractor.start();
         } else {
             usage();
         }
     }
+
     public void classify() {
 
-        if (this.propertySource.containsProperty("inputDir") ) {
+        if (this.propertySource.containsProperty("inputDir")) {
             bodyWomanNudeClassifier.setInputDir(this.propertySource.getProperty("inputDir").toString());
             bodyWomanNudeClassifier.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
             bodyWomanNudeClassifier.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
