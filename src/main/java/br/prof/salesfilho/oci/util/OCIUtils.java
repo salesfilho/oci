@@ -7,6 +7,7 @@ package br.prof.salesfilho.oci.util;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
@@ -31,6 +32,7 @@ public class OCIUtils {
                 results.add(file.getAbsolutePath());
             }
         }
+        Collections.sort(results);
         return results;
     }
 

@@ -29,4 +29,5 @@ public class BodyPartDescriptor extends ImageDescriptor {
         this.name = name;
         this.nude = nude;
     }
+    
 }

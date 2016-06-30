@@ -23,21 +23,16 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author salesfilho
  */
-@Component
-public class BodyWomanDescriptorFeatureExtractor {
+public class BodyWomanFeatureExtractorExecutor implements Runnable {
 
-    @Autowired
-    private BodyWomanDescriptorService bodyWomanDescriptorService;
+    private final BodyWomanDescriptorService bodyWomanDescriptorService;
 
-    @Autowired
-    private ImageProcessorService imageProcessorService;
+    private final ImageProcessorService imageProcessorService;
 
     @Getter
     @Setter
@@ -59,10 +54,20 @@ public class BodyWomanDescriptorFeatureExtractor {
     @Setter
     private double kernelSize;
 
+    @Getter
+    @Setter
+    private boolean nude;
+
     private static final double DEFAULT_KERNEL_SIZE = 0.15;
     private static final String DEFAULT_FEATURE_IMAGE_SIZE = "128x128";
 
-    void start() {
+    public BodyWomanFeatureExtractorExecutor(BodyWomanDescriptorService bodyWomanDescriptorService, ImageProcessorService imageProcessorService, boolean nude) {
+        this.bodyWomanDescriptorService = bodyWomanDescriptorService;
+        this.imageProcessorService = imageProcessorService;
+        this.nude = nude;
+    }
+
+    private void start() {
 
         fileList = OCIUtils.getImageFiles(this.inputDir);
         if (databaseName == null || databaseName.isEmpty()) {
@@ -73,7 +78,11 @@ public class BodyWomanDescriptorFeatureExtractor {
         if (kernelSize <= 0 || kernelSize > 10) {
             this.kernelSize = DEFAULT_KERNEL_SIZE;
         }
-        this.extractFeatures();
+        if (isNude()) {
+            this.extractNudeFeatures();
+        } else {
+            this.extractNotNudeFeatures();
+        }
     }
 
     private BodyWomanDescriptor extract(String descriptorName, boolean isNude) {
@@ -179,14 +188,14 @@ public class BodyWomanDescriptorFeatureExtractor {
 
     }
 
-  public void extractFeatures() {
+    public void extractNudeFeatures() {
 
         long startTime = System.currentTimeMillis();
 
-        bodyWomanDescriptorService.openDatabase(new File(this.databaseName));
+        File f = new File( this.databaseName + "_nude.xml");
+        bodyWomanDescriptorService.openDatabase(f);
         bodyWomanDescriptorService.add(extract("Nude body descriptor", true));
-        bodyWomanDescriptorService.add(extract("Not Nude body descriptor", false));
-        bodyWomanDescriptorService.save(new File(this.databaseName));
+        bodyWomanDescriptorService.save(f, true);
 
         long endTime = System.currentTimeMillis();
 
@@ -194,6 +203,23 @@ public class BodyWomanDescriptorFeatureExtractor {
         System.out.println("Total process time: " + (endTime - startTime) + " ms");
         System.out.println("*************************************************************************************");
     }
+
+    public void extractNotNudeFeatures() {
+
+        long startTime = System.currentTimeMillis();
+        File f = new File( this.databaseName + "_not_nude.xml");
+
+        bodyWomanDescriptorService.openDatabase(f);
+        bodyWomanDescriptorService.add(extract("Not Nude body descriptor", false));
+        bodyWomanDescriptorService.save(f, false);
+
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("*************************************************************************************");
+        System.out.println("Total process time: " + (endTime - startTime) + " ms");
+        System.out.println("*************************************************************************************");
+    }
+
     private BodyPartDescriptor populate(BodyPartDescriptor part, String path) {
 
         List<double[]> listRedChannelFeatures = new ArrayList<>();
@@ -221,7 +247,7 @@ public class BodyWomanDescriptorFeatureExtractor {
                 listRgbAvgFeatures.add(imageFeaturesMap.get("avg"));
 
             } catch (IOException ex) {
-                Logger.getLogger(BodyWomanDescriptorFeatureExtractor.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(BodyWomanFeatureExtractorExecutor.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         }
@@ -233,6 +259,11 @@ public class BodyWomanDescriptorFeatureExtractor {
         part.setAvgChannel(imageProcessorService.getAvarege(listRgbAvgFeatures));
 
         return part;
+    }
+
+    @Override
+    public void run() {
+        this.start();
     }
 
 }

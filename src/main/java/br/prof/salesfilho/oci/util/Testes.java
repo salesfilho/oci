@@ -5,24 +5,6 @@
  */
 package br.prof.salesfilho.oci.util;
 
-import br.prof.salesfilho.oci.domain.ImageDescriptor;
-import br.prof.salesfilho.oci.image.GraphicBuilder;
-import br.prof.salesfilho.oci.view.console.ImageFeaturesExtractor;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import org.jfree.ui.RefineryUtilities;
-
 /**
  *
  * @author salesfilho

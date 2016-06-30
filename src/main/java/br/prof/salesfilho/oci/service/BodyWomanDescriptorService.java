@@ -34,6 +34,9 @@ public class BodyWomanDescriptorService {
     public void save(File xmlDatabase) {
         dao.save(xmlDatabase);
     }
+    public void save(File xmlDatabase, boolean isNude) {
+        dao.save(xmlDatabase, isNude);
+    }
 
     public String toXML() {
         return dao.toXML();

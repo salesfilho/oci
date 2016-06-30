@@ -9,7 +9,6 @@ import br.prof.salesfilho.oci.service.BodyWomanDescriptorService;
 import br.prof.salesfilho.oci.service.BodyWomanNudeClassifier;
 import br.prof.salesfilho.oci.service.ImageNormalizerService;
 import br.prof.salesfilho.oci.service.ImageProcessorService;
-import br.prof.salesfilho.oci.service.ImageWomanBustClassifier;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import javax.annotation.PostConstruct;
@@ -37,13 +36,7 @@ public class Main {
     private ImageNormalizerService imageNormalizer;
 
     @Autowired
-    private ImageFeaturesExtractor featureExtractor;
-
-    @Autowired
     private BodyWomanDescriptorFeatureExtractor womanDescriptorFeatureExtractor;
-
-    @Autowired
-    private ImageWomanBustClassifier classifier;
 
     @Autowired
     private BodyWomanNudeClassifier bodyWomanNudeClassifier;
@@ -102,16 +95,27 @@ public class Main {
             womanDescriptorFeatureExtractor.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
 
             BodyWomanFeatureExtractorExecutor e1 = new BodyWomanFeatureExtractorExecutor(bodyWomanDescriptorService, imageProcessorService, true);
+            e1.setInputDir(this.propertySource.getProperty("inputDir").toString());
+            e1.setOutputDir(this.propertySource.getProperty("outputDir").toString());
+            e1.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
+            e1.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
+
             Thread t1 = new Thread(e1);
-            t1.start();;
+            t1.start();
 
             BodyWomanFeatureExtractorExecutor e2 = new BodyWomanFeatureExtractorExecutor(bodyWomanDescriptorService, imageProcessorService, false);
+
+            e2.setInputDir(this.propertySource.getProperty("inputDir").toString());
+            e2.setOutputDir(this.propertySource.getProperty("outputDir").toString());
+            e2.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
+            e2.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
+
             Thread t2 = new Thread(e2);
             t2.start();
+            
+            
 
-
-
-
+            // 10.25.3.87
 //            featureExtractor.setInputDir(this.propertySource.getProperty("inputDir").toString());
 //            featureExtractor.setOutputDir(this.propertySource.getProperty("outputDir").toString());
 //            featureExtractor.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));

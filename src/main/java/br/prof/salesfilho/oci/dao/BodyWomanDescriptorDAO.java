@@ -72,6 +72,28 @@ public class BodyWomanDescriptorDAO {
         }
     }
 
+    public void save(File destination, boolean isNude) {
+        try {
+            XStream xs = new XStream();
+            xs.alias("BodyWomanDescriptorDatabase", BodyWomanDescriptorDatabase.class);
+            xs.alias("BodyWomanDescriptor", BodyWomanDescriptor.class);
+            xs.alias("BodyPartDescriptor", BodyPartDescriptor.class);
+
+            if (isNude) {
+                BodyWomanDescriptorDatabase nudeDatabase = new BodyWomanDescriptorDatabase();
+                nudeDatabase.addAllBodyWomanDescriptor(this.database.getNudeBodyWomanDescriptor());
+                xs.toXML(nudeDatabase, new FileOutputStream(destination));
+            }else{
+                BodyWomanDescriptorDatabase newDatabase = new BodyWomanDescriptorDatabase();
+                newDatabase.addAllBodyWomanDescriptor(this.database.getNotNudeBodyWomanDescriptor());
+                xs.toXML(newDatabase, new FileOutputStream(destination));
+            }
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(BodyWomanDescriptorDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public String toXML() {
         XStream xs = new XStream();
         xs.alias("BodyWomanDescriptorDatabase", BodyWomanDescriptorDatabase.class);
@@ -110,10 +132,12 @@ public class BodyWomanDescriptorDAO {
     public List<BodyPartDescriptor> findAllNotNudeBodyPartDescriptors() {
         return this.database.getAllNotNudeBodyPartDescriptors();
     }
-    public BodyPartDescriptor findNotNudeBodyPartDescriptorByName( String name) {
+
+    public BodyPartDescriptor findNotNudeBodyPartDescriptorByName(String name) {
         return this.database.getNotNudeBodyPartDescriptorByName(name);
     }
-    public BodyPartDescriptor findNudeBodyPartDescriptorByName( String name) {
+
+    public BodyPartDescriptor findNudeBodyPartDescriptorByName(String name) {
         return this.database.getNudeBodyPartDescriptorByName(name);
     }
 

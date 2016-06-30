@@ -5,41 +5,29 @@
  */
 package br.prof.salesfilho.oci.view.gui;
 
-import br.prof.salesfilho.oci.image.ImageProcessor;
-import br.prof.salesfilho.oci.service.ImageNormalizerService;
-import br.prof.salesfilho.oci.util.OCIUtils;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
-import java.awt.image.WritableRaster;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-
 /**
  *
  * @author salesfilho
  */
 public class Testes {
 
-    private ImageProcessor imageProcessor;
+   // private ImageProcessor imageProcessor;
 
     public static void main(String[] args) {
-        Testes t = new Testes();
-        BufferedImage image;
-        try {
-            String path = "/Users/salesfilho/Downloads/database/busto_nu/256x256/";
-            image = ImageIO.read(new File("/Users/salesfilho/Downloads/database/busto_nu/256x256/06.jpg"));
-            t.imageProcessor = new ImageProcessor(image);
-
-            int idx = 0;
-            for (BufferedImage subImage : t.imageProcessor.getSubImages(64)) {
-                ImageIO.write(subImage, "jpg", new File(path.concat("part-" + idx + ".jpg")));
-                idx++;
-            }
+        System.out.println("Tested!");
+    }
+//        Testes t = new Testes();
+//        BufferedImage image;
+//        try {
+//            String path = "/Users/salesfilho/Downloads/database/busto_nu/256x256/";
+//            image = ImageIO.read(new File("/Users/salesfilho/Downloads/database/busto_nu/256x256/06.jpg"));
+//            t.imageProcessor = new ImageProcessor(image);
+//
+//            int idx = 0;
+//            for (BufferedImage subImage : t.imageProcessor.getSubImages(64)) {
+//                ImageIO.write(subImage, "jpg", new File(path.concat("part-" + idx + ".jpg")));
+//                idx++;
+//            }
 
 //            BufferedImage subImage = image.getSubimage(0, 0, 128, 128);
 //            ImageIO.write(subImage, "jpg", new File(path.concat("part-0" + ".jpg")));
@@ -79,20 +67,20 @@ public class Testes {
 //            for (double[][] partImage : partsOfImage) {
 //                bytesImage = OCIUtils.convertDoubleArray2IntArray(OCIUtils.vetorize(partImage));
 //                ImageIO.write((BufferedImage) getImageFromArray(bytesImage, partImage.length, partImage.length), "jpg", new File(path.concat("part-" + idx + ".jpg")));
-//                idx++;
-//            }
-        } catch (IOException ex) {
-            Logger.getLogger(ImageNormalizerService.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        //t.imageProcessor = new ImageProcessor()
-    }
-
-    public static Image getImageFromArray(int[] pixels, int width, int height) {
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        //WritableRaster raster = (WritableRaster) image.getData();
-        //raster.setPixels(0, 0, width, height, pixels);
-        image.setRGB(0, 0, width, height, pixels, 0, width);
-        return image;
-    }
+////                idx++;
+////            }
+//        } catch (IOException ex) {
+//            Logger.getLogger(ImageNormalizerService.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        //t.imageProcessor = new ImageProcessor()
+//    }
+//
+//    public static Image getImageFromArray(int[] pixels, int width, int height) {
+//        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+//        //WritableRaster raster = (WritableRaster) image.getData();
+//        //raster.setPixels(0, 0, width, height, pixels);
+//        image.setRGB(0, 0, width, height, pixels, 0, width);
+//        return image;
+//    }
 }
