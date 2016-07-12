@@ -115,7 +115,7 @@ public class BodyWomanNudeClassifier {
                 List<BufferedImage> partImageList = imageProcessorService.getSubImages(128);
 
                 //Create new thread pool to each image file
-                executor = Executors.newFixedThreadPool(3);
+                executor = Executors.newFixedThreadPool(5);
                 int idx = 0;
                 for (BufferedImage subImg : partImageList) {
                     System.out.println("Creating threads to compute subimage: " + idx);

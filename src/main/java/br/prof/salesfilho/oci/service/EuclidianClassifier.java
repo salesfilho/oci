@@ -29,7 +29,7 @@ public class EuclidianClassifier implements Runnable {
     private boolean finish;
     private int classificationLevel = 1;
 
-    public EuclidianClassifier( BodyPartDescriptor nudeBodyPartDescriptor, BodyPartDescriptor notNudeBodyPartDescriptor, BufferedImage image, double kernelSize) {
+    public EuclidianClassifier(BodyPartDescriptor nudeBodyPartDescriptor, BodyPartDescriptor notNudeBodyPartDescriptor, BufferedImage image, double kernelSize) {
         this.imageProcessor = new ImageProcessor(image);
         this.nudeBodyPartDescriptor = nudeBodyPartDescriptor;
         this.notNudeBodyPartDescriptor = notNudeBodyPartDescriptor;
@@ -59,12 +59,22 @@ public class EuclidianClassifier implements Runnable {
         double[] grayChanellDescriptor;
         double[] avgChanellDescriptor;
 
+        long startTime, endTime;
+
         switch (level) {
             case 1:
                 //Gray
                 grayChanellDescriptor = imageProcessor.getMagnitude(ImageProcessor.CHANNEL_GRAYSCALE, kernelSize);
+
+                startTime = System.currentTimeMillis();
                 yesNudeDistance += euclideanDistance.compute(grayChanellDescriptor, nudeBodyPartDescriptor.getGrayScaleChannel());
+                endTime = System.currentTimeMillis();
+                System.out.println("Time in secunds to comput nude enclidian distance: " + (double)(endTime - startTime) / 1000);
+
+                startTime = System.currentTimeMillis();
                 noNudeDistance += euclideanDistance.compute(grayChanellDescriptor, notNudeBodyPartDescriptor.getGrayScaleChannel());
+                endTime = System.currentTimeMillis();
+                System.out.println("Time in secunds to comput NOT nude enclidian distance: " + (double)(endTime - startTime) / 1000);
                 break;
             case 2:
                 redChanellDescriptor = imageProcessor.getMagnitude(ImageProcessor.CHANNEL_RED, kernelSize);

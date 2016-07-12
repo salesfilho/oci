@@ -196,6 +196,9 @@ public class ImageProcessor {
      * @return getMagnitude/modulo = fft(autocorrentropia)) as array
      */
     public double[] getMagnitude(int channel, double kernel) {
+
+        long startTime = System.currentTimeMillis();
+
         double[] result = this.getAutoCorrentropy(channel, kernel);
 
         FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
@@ -205,6 +208,10 @@ public class ImageProcessor {
             double img = (complexTransInput[i].getImaginary());
             result[i] = Math.sqrt(Math.pow(real, 2) + Math.pow(img, 2));
         }
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Time in secunds to getMagnitude (include getAutoCorrentropy): " + (double)(endTime - startTime) / 1000);
+
         return result;
     }
 
@@ -252,6 +259,7 @@ public class ImageProcessor {
      */
     private double[] getAutoCorrentropy(int channel, double kernel) {
 
+        long startTime = System.currentTimeMillis();
         //Vetorization and normalization
         double[] signal = this.getZigZagVetorized(this.getColorMatrix(channel));
 
@@ -269,20 +277,26 @@ public class ImageProcessor {
                 autoCorrentropy[m] = autoCorrentropy[m] + equation;
             }
         }
+        long endTime = System.currentTimeMillis();
+        System.out.println("Time in secunds to getAutoCorrentropy: " + (double)(endTime - startTime) / 1000);
         return autoCorrentropy;
     }
 
     private double[] getZigZagVetorized(double[][] source) {
+        long startTime = System.currentTimeMillis();
 
-        List<double[][]> splited = this.getSplitMatrix(source, 2);
+        double[][][] splited = this.getSplitMatrix(source, 2);
 
-        double[] outArray = new double[splited.size() * 4];
+        double[] outArray = new double[splited.length * 4];
         int offSet = 0;
         for (double[][] matrix : splited) {
             double[] v = this.getVetorized(matrix);
             System.arraycopy(v, 0, outArray, offSet, v.length);
             offSet = offSet + 4;
         }
+        long endTime = System.currentTimeMillis();
+        System.out.println("Time in secunds to getZigZagVetorized: " + (double)(endTime - startTime) / 1000);
+
         return outArray;
     }
 
@@ -293,13 +307,13 @@ public class ImageProcessor {
      * @precond chunksize > 0 && larger != null
      * @throws ArrayIndexOutOfBoundsException, NullPointerException
      */
-    private List<double[][]> getSplitMatrix(double[][] larger, int subArraySize) throws
+    private double[][][] getSplitMatrix(double[][] larger, int subArraySize) throws
             ArrayIndexOutOfBoundsException, NullPointerException {
         if (subArraySize <= 0) {
             throw new ArrayIndexOutOfBoundsException("Chunks must be atleast 1x1");
         }
         int size = larger.length / subArraySize * (larger[0].length / subArraySize);
-        List<double[][]> subArrays = new ArrayList<>();
+        double[][][] subArrays = new double[size][][];
 
         for (int c = 0; c < size; c++) {
             double[][] sub = new double[subArraySize][subArraySize];
@@ -315,7 +329,7 @@ public class ImageProcessor {
                     sub[row][col] = larger[startx + row][col + starty];
                 }
             }
-            subArrays.add(sub);
+            subArrays[c] = sub;
         }
 
         return subArrays;
