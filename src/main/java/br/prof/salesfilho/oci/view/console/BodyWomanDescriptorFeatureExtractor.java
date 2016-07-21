@@ -77,28 +77,22 @@ public class BodyWomanDescriptorFeatureExtractor {
     }
 
     private BodyWomanDescriptor extract(String descriptorName, boolean isNude) {
-        String facePath;
         String buttockPath;
         String chestPath;
         String genitalPath;
-        String umbilicusPath;
 
         long startPartTime;
         long endPartTime;
 
         if (isNude) {
-            facePath = this.inputDir.concat("/nude/face/".concat(DEFAULT_FEATURE_IMAGE_SIZE));
             buttockPath = this.inputDir.concat("/nude/buttock/".concat(DEFAULT_FEATURE_IMAGE_SIZE));
             chestPath = this.inputDir.concat("/nude/chest/".concat(DEFAULT_FEATURE_IMAGE_SIZE));
             genitalPath = this.inputDir.concat("/nude/genital/".concat(DEFAULT_FEATURE_IMAGE_SIZE));
-            umbilicusPath = this.inputDir.concat("/nude/umbilicus/".concat(DEFAULT_FEATURE_IMAGE_SIZE));
 
         } else {
-            facePath = this.inputDir.concat("/not_nude/face/".concat(DEFAULT_FEATURE_IMAGE_SIZE));
             buttockPath = this.inputDir.concat("/not_nude/buttock/".concat(DEFAULT_FEATURE_IMAGE_SIZE));
             chestPath = this.inputDir.concat("/not_nude/chest/".concat(DEFAULT_FEATURE_IMAGE_SIZE));
             genitalPath = this.inputDir.concat("/not_nude/genital/".concat(DEFAULT_FEATURE_IMAGE_SIZE));
-            umbilicusPath = this.inputDir.concat("/not_nude/umbilicus/".concat(DEFAULT_FEATURE_IMAGE_SIZE));
 
         }
 
@@ -108,32 +102,17 @@ public class BodyWomanDescriptorFeatureExtractor {
 
         BodyWomanDescriptor womanDescriptor = new BodyWomanDescriptor(descriptorName, isNude);
 
-        /*Add face features*/
-        startPartTime = System.currentTimeMillis();
-
-        BodyPartDescriptor partDescriptor = new BodyPartDescriptor("Face", isNude);
-        partDescriptor = populate(partDescriptor, facePath);
-        womanDescriptor.addBodyPart(partDescriptor);
-
-        endPartTime = System.currentTimeMillis();
-
-        System.out.println("------------------------------------------------------------------------------------");
-        System.out.println("Time to " + partDescriptor.getName() + " :" + (endPartTime - startPartTime) + " ms");
-        System.out.println("------------------------------------------------------------------------------------");
-
         /*Add Buttock features*/
         startPartTime = System.currentTimeMillis();
-
-        partDescriptor = new BodyPartDescriptor("Buttock", isNude);
+        BodyPartDescriptor partDescriptor = new BodyPartDescriptor("Buttock", isNude);
         partDescriptor = populate(partDescriptor, buttockPath);
         womanDescriptor.addBodyPart(partDescriptor);
 
         endPartTime = System.currentTimeMillis();
 
         System.out.println("------------------------------------------------------------------------------------");
-        System.out.println("Time to " + partDescriptor.getName() + " :" + (endPartTime - startPartTime) + " ms");
+        System.out.println("Time to " + partDescriptor.getName() + " :" + (double)(endPartTime - startPartTime)/1000 + " secunds");
         System.out.println("------------------------------------------------------------------------------------");
-
 
         /*Add chest features*/
         startPartTime = System.currentTimeMillis();
@@ -145,9 +124,8 @@ public class BodyWomanDescriptorFeatureExtractor {
         endPartTime = System.currentTimeMillis();
 
         System.out.println("------------------------------------------------------------------------------------");
-        System.out.println("Time to " + partDescriptor.getName() + " :" + (endPartTime - startPartTime) + " ms");
+        System.out.println("Time to " + partDescriptor.getName() + " :" + (double)(endPartTime - startPartTime)/1000 + " secunds");
         System.out.println("------------------------------------------------------------------------------------");
-
 
         /*Add genital features*/
         startPartTime = System.currentTimeMillis();
@@ -159,27 +137,14 @@ public class BodyWomanDescriptorFeatureExtractor {
         endPartTime = System.currentTimeMillis();
 
         System.out.println("------------------------------------------------------------------------------------");
-        System.out.println("Time to " + partDescriptor.getName() + " :" + (endPartTime - startPartTime) + " ms");
-        System.out.println("------------------------------------------------------------------------------------");
-
-        /*Add umbilicus features*/
-        startPartTime = System.currentTimeMillis();
-
-        partDescriptor = new BodyPartDescriptor("Umbilicus", isNude);
-        partDescriptor = populate(partDescriptor, umbilicusPath);
-        womanDescriptor.addBodyPart(partDescriptor);
-
-        endPartTime = System.currentTimeMillis();
-
-        System.out.println("------------------------------------------------------------------------------------");
-        System.out.println("Time to " + partDescriptor.getName() + " :" + (endPartTime - startPartTime) + " ms");
+        System.out.println("Time to " + partDescriptor.getName() + " :" + (double)(endPartTime - startPartTime)/1000 + " secunds");
         System.out.println("------------------------------------------------------------------------------------");
 
         return womanDescriptor;
 
     }
 
-  public void extractFeatures() {
+    public void extractFeatures() {
 
         long startTime = System.currentTimeMillis();
 
@@ -191,9 +156,10 @@ public class BodyWomanDescriptorFeatureExtractor {
         long endTime = System.currentTimeMillis();
 
         System.out.println("*************************************************************************************");
-        System.out.println("Total process time: " + (endTime - startTime) + " ms");
+        System.out.println("Total process time: " + (double)(endTime - startTime)/1000 + " secunds");
         System.out.println("*************************************************************************************");
     }
+
     private BodyPartDescriptor populate(BodyPartDescriptor part, String path) {
 
         List<double[]> listRedChannelFeatures = new ArrayList<>();
@@ -223,7 +189,6 @@ public class BodyWomanDescriptorFeatureExtractor {
             } catch (IOException ex) {
                 Logger.getLogger(BodyWomanDescriptorFeatureExtractor.class.getName()).log(Level.SEVERE, null, ex);
             }
-
         }
         /* Populate Descriptor Object */
         part.setRedChannel(imageProcessorService.getAvarege(listRedChannelFeatures));

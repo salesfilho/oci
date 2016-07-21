@@ -9,8 +9,11 @@ import br.prof.salesfilho.oci.service.BodyWomanDescriptorService;
 import br.prof.salesfilho.oci.service.BodyWomanNudeClassifier;
 import br.prof.salesfilho.oci.service.ImageNormalizerService;
 import br.prof.salesfilho.oci.service.ImageProcessorService;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,14 +97,16 @@ public class Main {
             womanDescriptorFeatureExtractor.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
             womanDescriptorFeatureExtractor.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
 
+            //Create new thread pool to each image file
+            ExecutorService executor = Executors.newFixedThreadPool(2);
+
             BodyWomanFeatureExtractorExecutor e1 = new BodyWomanFeatureExtractorExecutor(bodyWomanDescriptorService, imageProcessorService, true);
             e1.setInputDir(this.propertySource.getProperty("inputDir").toString());
             e1.setOutputDir(this.propertySource.getProperty("outputDir").toString());
             e1.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
             e1.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
 
-            Thread t1 = new Thread(e1);
-            t1.start();
+            executor.execute(e1);
 
             BodyWomanFeatureExtractorExecutor e2 = new BodyWomanFeatureExtractorExecutor(bodyWomanDescriptorService, imageProcessorService, false);
 
@@ -110,23 +115,18 @@ public class Main {
             e2.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
             e2.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
 
-            Thread t2 = new Thread(e2);
-            t2.start();
-            
-            
+            executor.execute(e2);
 
-            // 10.25.3.87
-//            featureExtractor.setInputDir(this.propertySource.getProperty("inputDir").toString());
-//            featureExtractor.setOutputDir(this.propertySource.getProperty("outputDir").toString());
-//            featureExtractor.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
-//            featureExtractor.setDescriptorType(Integer.valueOf(this.propertySource.getProperty("type").toString()));
-//            featureExtractor.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
-//
-        } else {
-            this.start = false;
-        }
-        if (this.start) {
-            //womanDescriptorFeatureExtractor.start();
+            //Wait finish
+            executor.shutdown();
+            while (!executor.isTerminated()) {
+            }
+            File f = new File(e1.getDatabaseName());
+            bodyWomanDescriptorService.openDatabase(f);
+            bodyWomanDescriptorService.add(e1.getBodyWomanDescriptor());
+            bodyWomanDescriptorService.add(e2.getBodyWomanDescriptor());
+            bodyWomanDescriptorService.save(f);
+
         } else {
             usage();
         }
@@ -138,7 +138,6 @@ public class Main {
             bodyWomanNudeClassifier.setInputDir(this.propertySource.getProperty("inputDir").toString());
             bodyWomanNudeClassifier.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
             bodyWomanNudeClassifier.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
-
         } else {
             this.start = false;
         }
@@ -159,7 +158,6 @@ public class Main {
         System.out.println("Ex.: extractFeatures: java -jar oci.jar --extractFeatures kernelsize=0.15 --type=1 --inputDir=/tmp/in --outputDir=/tmp/out");
         System.out.println("Ex.: normalyze and extractFeatures: java -jar oci.jar --normalyze --extractFeatures --inputDir=/tmp/in --outputDir=/tmp/out");
         System.out.println("");
-
         System.out.println("------------------------------------------------------------------------------------");
 
     }

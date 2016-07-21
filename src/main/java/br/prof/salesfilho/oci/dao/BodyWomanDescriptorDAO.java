@@ -37,7 +37,6 @@ public class BodyWomanDescriptorDAO {
         xs.alias("BodyWomanDescriptorDatabase", BodyWomanDescriptorDatabase.class);
         xs.alias("BodyWomanDescriptor", BodyWomanDescriptor.class);
         xs.alias("BodyPartDescriptor", BodyPartDescriptor.class);
-
         this.database = (BodyWomanDescriptorDatabase) xs.fromXML(xmlDatabase);
     }
 
@@ -51,7 +50,6 @@ public class BodyWomanDescriptorDAO {
         xs.alias("BodyWomanDescriptorDatabase", BodyWomanDescriptorDatabase.class);
         xs.alias("BodyWomanDescriptor", BodyWomanDescriptor.class);
         xs.alias("BodyPartDescriptor", BodyPartDescriptor.class);
-
         if (databaseFile.exists()) {
             this.database = (BodyWomanDescriptorDatabase) xs.fromXML(databaseFile);
         } else {
@@ -78,7 +76,6 @@ public class BodyWomanDescriptorDAO {
             xs.alias("BodyWomanDescriptorDatabase", BodyWomanDescriptorDatabase.class);
             xs.alias("BodyWomanDescriptor", BodyWomanDescriptor.class);
             xs.alias("BodyPartDescriptor", BodyPartDescriptor.class);
-
             if (isNude) {
                 BodyWomanDescriptorDatabase nudeDatabase = new BodyWomanDescriptorDatabase();
                 nudeDatabase.addAllBodyWomanDescriptor(this.database.getNudeBodyWomanDescriptor());
@@ -88,7 +85,6 @@ public class BodyWomanDescriptorDAO {
                 newDatabase.addAllBodyWomanDescriptor(this.database.getNotNudeBodyWomanDescriptor());
                 xs.toXML(newDatabase, new FileOutputStream(destination));
             }
-
         } catch (FileNotFoundException ex) {
             Logger.getLogger(BodyWomanDescriptorDAO.class.getName()).log(Level.SEVERE, null, ex);
         }

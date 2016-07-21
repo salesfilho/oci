@@ -10,7 +10,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath br.prof.salesfilho.oci.OciApplication --extractFeatures --inputDir=/Users/salesfilho/Downloads/database/woaman --kernelsize=0.15 --databaseName=descritors_128x128.xml  --outputDir=/Users/salesfilho/Downloads/database/woaman</exec.args>
+                <exec.args>-classpath %classpath br.prof.salesfilho.oci.OciApplication --extractFeatures --inputDir=/Users/salesfilho/Downloads/database/descriptors/woaman --kernelsize=0.15 --databaseName=descritors_128x128_kernel_0.15.xml  --outputDir=/Users/salesfilho/Downloads/database/descriptors/woaman</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
@@ -24,7 +24,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath br.prof.salesfilho.oci.OciApplication --extractFeatures --inputDir=/Users/salesfilho/Downloads/database/woaman --kernelsize=0.15 --databaseName=descritors_128x128.xml  --outputDir=/Users/salesfilho/Downloads/database/woaman</exec.args>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath br.prof.salesfilho.oci.OciApplication --extractFeatures --inputDir=/Users/salesfilho/Downloads/database/descriptors/woaman --kernelsize=0.15 --databaseName=descritors_128x128_kernel_0.15.xml  --outputDir=/Users/salesfilho/Downloads/database/descriptors/woaman</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
             </properties>
@@ -39,7 +39,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath br.prof.salesfilho.oci.OciApplication --extractFeatures --inputDir=/Users/salesfilho/Downloads/database/woaman --kernelsize=0.15 --databaseName=descritors_128x128.xml  --outputDir=/Users/salesfilho/Downloads/database/woaman</exec.args>
+                <exec.args>-classpath %classpath br.prof.salesfilho.oci.OciApplication --extractFeatures --inputDir=/Users/salesfilho/Downloads/database/descriptors/woaman --kernelsize=0.15 --databaseName=descritors_128x128_kernel_0.15.xml  --outputDir=/Users/salesfilho/Downloads/database/descriptors/woaman</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
