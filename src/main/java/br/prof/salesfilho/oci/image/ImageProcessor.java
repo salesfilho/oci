@@ -216,9 +216,9 @@ public class ImageProcessor {
      */
     public double[] getMagnitudeAvarageFromRgbChannels(double kernel) {
         List<double[]> listAvg = new ArrayList();
-        listAvg.add(this.getAutoCorrentropy(CHANNEL_RED, kernel));
-        listAvg.add(this.getAutoCorrentropy(CHANNEL_GREEN, kernel));
-        listAvg.add(this.getAutoCorrentropy(CHANNEL_BLUE, kernel));
+        listAvg.add(this.getMagnitude(CHANNEL_RED, kernel));
+        listAvg.add(this.getMagnitude(CHANNEL_GREEN, kernel));
+        listAvg.add(this.getMagnitude(CHANNEL_BLUE, kernel));
         return this.getAvarage(listAvg);
     }
 
