@@ -57,13 +57,11 @@ public class ImageProcessorService {
         double[] redChannelFeatures = this.getMagnitude(ImageProcessor.CHANNEL_RED, kernelSize);
         double[] greenChannelFeatures = this.getMagnitude(ImageProcessor.CHANNEL_GREEN, kernelSize);
         double[] blueChannelFeatures = this.getMagnitude(ImageProcessor.CHANNEL_BLUE, kernelSize);
-        double[] grayScaleChannelFeatures = this.getMagnitude(ImageProcessor.CHANNEL_GRAYSCALE, kernelSize);
         double[] rgbAvgFeatures = processor.getMagnitudeAvarageFromRgbChannels(kernelSize);
 
         result.put("red", redChannelFeatures);
         result.put("green", greenChannelFeatures);
         result.put("blue", blueChannelFeatures);
-        result.put("gray", grayScaleChannelFeatures);
         result.put("avg", rgbAvgFeatures);
 
         return result;
