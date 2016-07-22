@@ -39,9 +39,6 @@ public class Main {
     private ImageNormalizerService imageNormalizer;
 
     @Autowired
-    private BodyWomanDescriptorFeatureExtractor womanDescriptorFeatureExtractor;
-
-    @Autowired
     private BodyWomanNudeClassifier bodyWomanNudeClassifier;
 
     @Autowired
@@ -92,10 +89,6 @@ public class Main {
     public void extractFeatures() {
 
         if (this.propertySource.containsProperty("inputDir") && this.propertySource.containsProperty("outputDir")) {
-            womanDescriptorFeatureExtractor.setInputDir(this.propertySource.getProperty("inputDir").toString());
-            womanDescriptorFeatureExtractor.setOutputDir(this.propertySource.getProperty("outputDir").toString());
-            womanDescriptorFeatureExtractor.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
-            womanDescriptorFeatureExtractor.setDatabaseName(this.propertySource.getProperty("databaseName").toString());
 
             //Create new thread pool to each image file
             ExecutorService executor = Executors.newFixedThreadPool(2);

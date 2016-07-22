@@ -53,6 +53,10 @@ public class BodyWomanNudeClassifier {
     @Setter
     private List<String> fileList;
 
+    @Getter
+    @Setter
+    private int classificationLevel = 1;
+
     public void start() {
         tClassify();
     }
@@ -93,21 +97,21 @@ public class BodyWomanNudeClassifier {
                 List<BufferedImage> partImageList = imageProcessorService.getSubImages(128);
 
                 //Create new thread pool to each image file
-                executor = Executors.newFixedThreadPool(5);
+                executor = Executors.newFixedThreadPool(3);
                 for (BufferedImage subImg : partImageList) {
 
                     chestWorker = new EuclidianClassifier(nudeChestDescriptor, notNudeChestDescriptor, subImg, this.kernelSize);
-                    chestWorker.setClassificationLevel(1);
+                    chestWorker.setClassificationLevel(this.classificationLevel);
                     executor.execute(chestWorker);
                     classifiers.add(chestWorker);
 
                     buttockWorker = new EuclidianClassifier(nudeButtockDescriptor, notNudeButtockDescriptor, subImg, this.kernelSize);
-                    buttockWorker.setClassificationLevel(1);
+                    buttockWorker.setClassificationLevel(this.classificationLevel);
                     executor.execute(buttockWorker);
                     classifiers.add(buttockWorker);
 
                     genitalWorker = new EuclidianClassifier(nudeGenitalDescriptor, notNudeGenitalDescriptor, subImg, this.kernelSize);
-                    genitalWorker.setClassificationLevel(1);
+                    genitalWorker.setClassificationLevel(this.classificationLevel);
                     executor.execute(genitalWorker);
                     classifiers.add(genitalWorker);
                 }
@@ -139,43 +143,81 @@ public class BodyWomanNudeClassifier {
     }
 
     public void printResult(List<EuclidianClassifier> classifiers) {
-        double chestCount = 0;
-        double buttockCount = 0;
-        double genitalCount = 0;
+        double nudeChestCount = 0;
+        double nudeButtockCount = 0;
+        double nudeGenitalCount = 0;
+
+        double notNudeChestCount = 0;
+        double notNudeButtockCount = 0;
+        double notNudeGenitalCount = 0;
+
+        double maybeNudeChestCount = 0;
+        double maybeNudeButtockCount = 0;
+        double maybeNudeGenitalCount = 0;
 
         //Comput classificarion for eath part
         for (EuclidianClassifier classification : classifiers) {
             if (classification.getNudeBodyPartDescriptor().getName().equalsIgnoreCase("chest")) {
-                chestCount += (classification.isNude() ? 1 : 0);
+                nudeChestCount += (classification.getClassification().equalsIgnoreCase("YES") ? 1 : 0);
+                notNudeChestCount += (classification.getClassification().equalsIgnoreCase("NO") ? 1 : 0);
+                maybeNudeChestCount += (classification.getClassification().equalsIgnoreCase("MAYBE") ? 1 : 0);
+
             } else if (classification.getNudeBodyPartDescriptor().getName().equalsIgnoreCase("buttock")) {
-                buttockCount += (classification.isNude() ? 1 : 0);
+                nudeButtockCount += (classification.getClassification().equalsIgnoreCase("YES") ? 1 : 0);
+                notNudeButtockCount += (classification.getClassification().equalsIgnoreCase("NO") ? 1 : 0);
+                maybeNudeButtockCount += (classification.getClassification().equalsIgnoreCase("MAYBE") ? 1 : 0);
 
             } else if (classification.getNudeBodyPartDescriptor().getName().equalsIgnoreCase("genital")) {
-                genitalCount += (classification.isNude() ? 1 : 0);
+                nudeGenitalCount += (classification.getClassification().equalsIgnoreCase("YES") ? 1 : 0);
+                notNudeGenitalCount += (classification.getClassification().equalsIgnoreCase("NO") ? 1 : 0);
+                maybeNudeGenitalCount += (classification.getClassification().equalsIgnoreCase("MAYBE") ? 1 : 0);
             }
         }
 
-        double nudeAvg = ((chestCount * 1) + (buttockCount * 2) + (genitalCount * 3)) / 6;
-        double notNudeAvg = (((4 - chestCount) * 1) + ((4 - buttockCount) * 2) + ((4 - genitalCount) * 3)) / 6;
+        double nudeAvg = ((nudeChestCount * 1) + (nudeButtockCount * 2) + (nudeGenitalCount * 3)) / 6;
+        double notNudeAvg = ((notNudeChestCount * 1) + (notNudeButtockCount * 2) + (notNudeGenitalCount * 3)) / 6;
+        double maybeAvg = ((maybeNudeChestCount * 1) + (maybeNudeButtockCount * 2) + (maybeNudeGenitalCount * 3)) / 6;
 
         String result;
 
-        if (nudeAvg > notNudeAvg) {
-            result = "YES";
-        } else if (nudeAvg < notNudeAvg) {
-            result = "NO";
+        if ((nudeAvg > notNudeAvg) && (nudeAvg > maybeAvg) ) {
+            result = "Higth probability";
+        } else if ( (notNudeAvg > nudeAvg) && (notNudeAvg > maybeAvg)) {
+            result = "Very low probability";
+        } else if ( (maybeAvg > nudeAvg) && (maybeAvg > notNudeAvg)) {
+            result = "Medium probability";
         } else {
-            result = "MAYBE";
+            result = "Low probability";
         }
         // Result
+        System.out.println("------------------- Parameters -------------------------");
+        System.out.println("Database...............: " + getDatabaseName());
+        System.out.println("Kernel size............: " + getKernelSize());
+        System.out.println("Classification Level...: " + getClassificationLevel());
+        System.out.println(" ");
         System.out.println("------------------- Matchs results ---------------------");
-        System.out.println("Chest..................: " + chestCount);
-        System.out.println("Buttock................: " + buttockCount);
-        System.out.println("Genital................: " + genitalCount);
-        System.out.println("Nude score.............: " + nudeAvg);
-        System.out.println("Not nude score.........: " + notNudeAvg);
+        
+        System.out.println("***** CLASS NUDE ***** ");
+        System.out.println("Chest..................: " + nudeChestCount);
+        System.out.println("Buttock................: " + nudeButtockCount);
+        System.out.println("Genital................: " + nudeGenitalCount);
+        
+        System.out.println("*** CLASS MAYBE NUDE *** ");
+        System.out.println("Chest..................: " + maybeNudeChestCount);
+        System.out.println("Buttock................: " + maybeNudeButtockCount);
+        System.out.println("Genital................: " + maybeNudeGenitalCount);
+        
+        System.out.println("*** CLASS NOT NUDE *** ");
+        System.out.println("Chest..................: " + notNudeChestCount);
+        System.out.println("Buttock................: " + notNudeButtockCount);
+        System.out.println("Genital................: " + notNudeGenitalCount);
+        
+        System.out.println("*** SCORE BOARD *** ");
+        System.out.println("Yes score..............: " + nudeAvg);
+        System.out.println("Maybe score............: " + maybeAvg);
+        System.out.println("No score...............: " + notNudeAvg);
         System.out.println("--------------------------------------------------------");
-        System.out.println("It's woman nude image..: " + result);
+        System.out.println("Nude classification....: " + result);
         System.out.println("--------------------------------------------------------");
 
     }

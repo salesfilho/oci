@@ -197,8 +197,6 @@ public class ImageProcessor {
      */
     public double[] getMagnitude(int channel, double kernel) {
 
-        long startTime = System.currentTimeMillis();
-
         double[] result = this.getAutoCorrentropy(channel, kernel);
 
         FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
@@ -208,10 +206,6 @@ public class ImageProcessor {
             double img = (complexTransInput[i].getImaginary());
             result[i] = Math.sqrt(Math.pow(real, 2) + Math.pow(img, 2));
         }
-
-        long endTime = System.currentTimeMillis();
-        System.out.println("Time in secunds to getMagnitude (include getAutoCorrentropy): " + (double)(endTime - startTime) / 1000);
-
         return result;
     }
 
@@ -259,8 +253,6 @@ public class ImageProcessor {
      */
     private double[] getAutoCorrentropy(int channel, double kernel) {
 
-        long startTime = System.currentTimeMillis();
-        //Vetorization and normalization
         double[] signal = this.getZigZagVetorized(this.getColorMatrix(channel));
 
         double twokSizeSquare = 2 * Math.pow(kernel, 2d);
@@ -277,14 +269,10 @@ public class ImageProcessor {
                 autoCorrentropy[m] = autoCorrentropy[m] + equation;
             }
         }
-        long endTime = System.currentTimeMillis();
-        System.out.println("Time in secunds to getAutoCorrentropy: " + (double)(endTime - startTime) / 1000);
         return autoCorrentropy;
     }
 
     private double[] getZigZagVetorized(double[][] source) {
-        long startTime = System.currentTimeMillis();
-
         double[][][] splited = this.getSplitMatrix(source, 2);
 
         double[] outArray = new double[splited.length * 4];
@@ -294,9 +282,6 @@ public class ImageProcessor {
             System.arraycopy(v, 0, outArray, offSet, v.length);
             offSet = offSet + 4;
         }
-        long endTime = System.currentTimeMillis();
-        System.out.println("Time in secunds to getZigZagVetorized: " + (double)(endTime - startTime) / 1000);
-
         return outArray;
     }
 

@@ -25,9 +25,8 @@ public class EuclidianClassifier implements Runnable {
     private BodyPartDescriptor notNudeBodyPartDescriptor;
     private BufferedImage image;
     private double kernelSize;
-    private boolean nude;
-    private boolean finish;
-    private int classificationLevel = 1;
+    private String classification; // YES, NO, MAYBE
+    private int classificationLevel = 1; // 1 - 3
 
     public EuclidianClassifier(BodyPartDescriptor nudeBodyPartDescriptor, BodyPartDescriptor notNudeBodyPartDescriptor, BufferedImage image, double kernelSize) {
         this.imageProcessor = new ImageProcessor(image);
@@ -35,18 +34,17 @@ public class EuclidianClassifier implements Runnable {
         this.notNudeBodyPartDescriptor = notNudeBodyPartDescriptor;
         this.image = image;
         this.kernelSize = kernelSize;
-        this.finish = false;
     }
 
     @Override
     public void run() {
-        System.out.println("Part classify: " + this.nudeBodyPartDescriptor.getName());
-        this.classify(this.classificationLevel);
-        this.finish = true;
-        System.out.println(this.nudeBodyPartDescriptor.getName() + " is nude: " + this.isNude());
+        System.out.println("Classification level: " + this.classificationLevel);
+        System.out.println("BodyPart classification: " + this.nudeBodyPartDescriptor.getName());
+        this.classify();
+        System.out.println("Classification result: " + this.getClassification());
     }
 
-    private void classify(int level) {
+    private void classify() {
 
         double yesNudeDistance = 0;
         double noNudeDistance = 0;
@@ -56,25 +54,14 @@ public class EuclidianClassifier implements Runnable {
         double[] redChanellDescriptor;
         double[] greenChanellDescriptor;
         double[] blueChanellDescriptor;
-        double[] grayChanellDescriptor;
         double[] avgChanellDescriptor;
 
-        long startTime, endTime;
-
-        switch (level) {
+        switch (this.classificationLevel) {
             case 1:
-                //Gray
-                grayChanellDescriptor = imageProcessor.getMagnitude(ImageProcessor.CHANNEL_GRAYSCALE, kernelSize);
-
-                startTime = System.currentTimeMillis();
-                yesNudeDistance += euclideanDistance.compute(grayChanellDescriptor, nudeBodyPartDescriptor.getGrayScaleChannel());
-                endTime = System.currentTimeMillis();
-                System.out.println("Time in secunds to comput nude enclidian distance: " + (double)(endTime - startTime) / 1000);
-
-                startTime = System.currentTimeMillis();
-                noNudeDistance += euclideanDistance.compute(grayChanellDescriptor, notNudeBodyPartDescriptor.getGrayScaleChannel());
-                endTime = System.currentTimeMillis();
-                System.out.println("Time in secunds to comput NOT nude enclidian distance: " + (double)(endTime - startTime) / 1000);
+                //RGB AVG
+                avgChanellDescriptor = imageProcessor.getMagnitudeAvarageFromRgbChannels(kernelSize);
+                yesNudeDistance += euclideanDistance.compute(avgChanellDescriptor, nudeBodyPartDescriptor.getAvgChannel());
+                noNudeDistance += euclideanDistance.compute(avgChanellDescriptor, notNudeBodyPartDescriptor.getAvgChannel());
                 break;
             case 2:
                 redChanellDescriptor = imageProcessor.getMagnitude(ImageProcessor.CHANNEL_RED, kernelSize);
@@ -98,7 +85,7 @@ public class EuclidianClassifier implements Runnable {
                 redChanellDescriptor = imageProcessor.getMagnitude(ImageProcessor.CHANNEL_RED, kernelSize);
                 greenChanellDescriptor = imageProcessor.getMagnitude(ImageProcessor.CHANNEL_GREEN, kernelSize);
                 blueChanellDescriptor = imageProcessor.getMagnitude(ImageProcessor.CHANNEL_BLUE, kernelSize);
-                grayChanellDescriptor = imageProcessor.getMagnitude(ImageProcessor.CHANNEL_GRAYSCALE, kernelSize);
+                avgChanellDescriptor = imageProcessor.getMagnitudeAvarageFromRgbChannels(kernelSize);
 
                 //Red
                 yesNudeDistance += euclideanDistance.compute(redChanellDescriptor, nudeBodyPartDescriptor.getRedChannel());
@@ -112,21 +99,27 @@ public class EuclidianClassifier implements Runnable {
                 yesNudeDistance += euclideanDistance.compute(blueChanellDescriptor, nudeBodyPartDescriptor.getBlueChannel());
                 noNudeDistance += euclideanDistance.compute(blueChanellDescriptor, notNudeBodyPartDescriptor.getBlueChannel());
 
-                //Gray
-                yesNudeDistance += euclideanDistance.compute(grayChanellDescriptor, nudeBodyPartDescriptor.getGrayScaleChannel());
-                noNudeDistance += euclideanDistance.compute(grayChanellDescriptor, notNudeBodyPartDescriptor.getGrayScaleChannel());
+                //RGB AVG
+                yesNudeDistance += euclideanDistance.compute(avgChanellDescriptor, nudeBodyPartDescriptor.getAvgChannel());
+                noNudeDistance += euclideanDistance.compute(avgChanellDescriptor, notNudeBodyPartDescriptor.getAvgChannel());
+
                 break;
-            case 4:
+            default:
                 //RGB AVG
                 avgChanellDescriptor = imageProcessor.getMagnitudeAvarageFromRgbChannels(kernelSize);
                 yesNudeDistance += euclideanDistance.compute(avgChanellDescriptor, nudeBodyPartDescriptor.getAvgChannel());
                 noNudeDistance += euclideanDistance.compute(avgChanellDescriptor, notNudeBodyPartDescriptor.getAvgChannel());
-            default:
-                //Gray
-                grayChanellDescriptor = imageProcessor.getMagnitude(ImageProcessor.CHANNEL_GRAYSCALE, kernelSize);
-                yesNudeDistance += euclideanDistance.compute(grayChanellDescriptor, nudeBodyPartDescriptor.getGrayScaleChannel());
-                noNudeDistance += euclideanDistance.compute(grayChanellDescriptor, notNudeBodyPartDescriptor.getGrayScaleChannel());
         }
-        this.nude = (yesNudeDistance <= noNudeDistance);
+
+        System.out.println("Distance YES.:  " + yesNudeDistance);
+        System.out.println("Distance NO..:  " + noNudeDistance);
+
+        if (yesNudeDistance < noNudeDistance) {
+            classification = "YES";
+        } else if (yesNudeDistance > noNudeDistance) {
+            classification = "NO";
+        } else {
+            classification = "MAYBE";
+        }
     }
 }
