@@ -219,7 +219,7 @@ public class ImageProcessor {
         listAvg.add(this.getMagnitude(CHANNEL_RED, kernel));
         listAvg.add(this.getMagnitude(CHANNEL_GREEN, kernel));
         listAvg.add(this.getMagnitude(CHANNEL_BLUE, kernel));
-        return this.getAvarage(listAvg);
+        return ImageProcessor.computeAvg(listAvg);
     }
 
     /**
@@ -227,7 +227,7 @@ public class ImageProcessor {
      * @precond input != null and equal size double array
      * @return avg array
      */
-    public double[] getAvarage(List<double[]> input) {
+    public static double[] computeAvg(List<double[]> input) {
         int vSize = input.get(0).length;
         double[] meanResult = new double[vSize];
         for (double[] vector : input) {

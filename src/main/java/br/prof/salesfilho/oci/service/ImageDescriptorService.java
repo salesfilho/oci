@@ -113,8 +113,6 @@ public class ImageDescriptorService {
 
         //Vetorization and normalization
         double[] signal = OCIUtils.vetorizeWithSpatialEntropySequence(this.getColorMatrix(image, channel));
-        //signal = OCIUtils.maxElementArrayNormalyze(signal);
-        //signal = OCIUtils.computEnergyVector(signal);
 
         double twokSizeSquare = 2 * Math.pow(kernel, 2d);
         int signal_length = signal.length;

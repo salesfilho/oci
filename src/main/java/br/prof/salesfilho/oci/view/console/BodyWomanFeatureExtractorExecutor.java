@@ -7,7 +7,7 @@ package br.prof.salesfilho.oci.view.console;
 
 import br.prof.salesfilho.oci.domain.BodyPartDescriptor;
 import br.prof.salesfilho.oci.domain.BodyWomanDescriptor;
-import br.prof.salesfilho.oci.service.BodyWomanDescriptorService;
+import br.prof.salesfilho.oci.image.ImageProcessor;
 import br.prof.salesfilho.oci.service.ImageProcessorService;
 import br.prof.salesfilho.oci.util.OCIUtils;
 import java.awt.image.BufferedImage;
@@ -29,10 +29,6 @@ import lombok.Setter;
  * @author salesfilho
  */
 public class BodyWomanFeatureExtractorExecutor implements Runnable {
-
-    private final BodyWomanDescriptorService bodyWomanDescriptorService;
-
-    private final ImageProcessorService imageProcessorService;
 
     @Getter
     @Setter
@@ -65,10 +61,8 @@ public class BodyWomanFeatureExtractorExecutor implements Runnable {
     private static final double DEFAULT_KERNEL_SIZE = 0.15;
     private static final String DEFAULT_FEATURE_IMAGE_SIZE = "128x128";
 
-    public BodyWomanFeatureExtractorExecutor(BodyWomanDescriptorService bodyWomanDescriptorService, ImageProcessorService imageProcessorService, boolean nude) {
-        this.bodyWomanDescriptorService = bodyWomanDescriptorService;
-        this.imageProcessorService = imageProcessorService;
-        this.nude = nude;
+    public BodyWomanFeatureExtractorExecutor(boolean nudeFeature) {
+        this.nude = nudeFeature;
     }
 
     private void start() {
@@ -93,7 +87,7 @@ public class BodyWomanFeatureExtractorExecutor implements Runnable {
 
         long startTime = System.currentTimeMillis();
         System.out.println("*************************************************************************************");
-        System.out.println("Extracting not nude image features" );
+        System.out.println("Extracting not nude image features");
         System.out.println("*************************************************************************************");
 
         bodyWomanDescriptor = extract("Nude body descriptor", true);
@@ -109,7 +103,7 @@ public class BodyWomanFeatureExtractorExecutor implements Runnable {
 
         long startTime = System.currentTimeMillis();
         System.out.println("*************************************************************************************");
-        System.out.println("Extracting nude image features" );
+        System.out.println("Extracting nude image features");
         System.out.println("*************************************************************************************");
 
         bodyWomanDescriptor = extract("Not nude body descriptor", false);
@@ -162,22 +156,28 @@ public class BodyWomanFeatureExtractorExecutor implements Runnable {
         List<double[]> listRedChannelFeatures = new ArrayList<>();
         List<double[]> listGreenChannelFeatures = new ArrayList<>();
         List<double[]> listBlueChannelFeatures = new ArrayList<>();
+        List<double[]> listGrayChannelFeatures = new ArrayList<>();
         List<double[]> listRgbAvgFeatures = new ArrayList<>();
 
         Map<String, double[]> imageFeaturesMap;
-
         fileList = OCIUtils.getImageFiles(path);
 
         for (String imagePath : fileList) {
+            System.out.println("Processing file: " + imagePath);
+
             try {
                 BufferedImage img = ImageIO.read(new File(imagePath));
-                imageProcessorService.setImage(img);
+                
+                ImageProcessorService imageService = new ImageProcessorService();
+                ImageProcessor ip = new ImageProcessor(img);
+                imageService.setProcessor(ip);
 
-                imageFeaturesMap = imageProcessorService.getImageFeaturesMap(img, kernelSize);
+                imageFeaturesMap = imageService.getImageFeaturesMap(kernelSize);
 
                 listRedChannelFeatures.add(imageFeaturesMap.get("red"));
                 listGreenChannelFeatures.add(imageFeaturesMap.get("green"));
                 listBlueChannelFeatures.add(imageFeaturesMap.get("blue"));
+                listGrayChannelFeatures.add(imageFeaturesMap.get("gray"));
                 listRgbAvgFeatures.add(imageFeaturesMap.get("avg"));
 
             } catch (IOException ex) {
@@ -185,10 +185,11 @@ public class BodyWomanFeatureExtractorExecutor implements Runnable {
             }
         }
         /* Populate Descriptor Object */
-        part.setRedChannel(imageProcessorService.getAvarege(listRedChannelFeatures));
-        part.setGreenChannel(imageProcessorService.getAvarege(listGreenChannelFeatures));
-        part.setBlueChannel(imageProcessorService.getAvarege(listBlueChannelFeatures));
-        part.setAvgChannel(imageProcessorService.getAvarege(listRgbAvgFeatures));
+        part.setRedChannel(ImageProcessorService.computeAgv(listRedChannelFeatures));
+        part.setGreenChannel(ImageProcessorService.computeAgv(listGreenChannelFeatures));
+        part.setBlueChannel(ImageProcessorService.computeAgv(listBlueChannelFeatures));
+        part.setGrayScaleChannel(ImageProcessorService.computeAgv(listGrayChannelFeatures));
+        part.setAvgChannel(ImageProcessorService.computeAgv(listRgbAvgFeatures));
 
         return part;
     }

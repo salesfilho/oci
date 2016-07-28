@@ -6,11 +6,14 @@
 package br.prof.salesfilho.oci.service;
 
 import br.prof.salesfilho.oci.domain.BodyPartDescriptor;
+import br.prof.salesfilho.oci.domain.ClassificationResult;
+import br.prof.salesfilho.oci.image.ImageProcessor;
 import br.prof.salesfilho.oci.util.OCIUtils;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,7 +37,6 @@ public class BodyWomanNudeClassifier {
     @Autowired
     private BodyWomanDescriptorService bodyWomanDescriptorService;
 
-    @Autowired
     private ImageProcessorService imageProcessorService;
 
     @Getter
@@ -57,6 +59,10 @@ public class BodyWomanNudeClassifier {
     @Setter
     private int classificationLevel = 1;
 
+    @Getter
+    @Setter
+    private List<ClassificationResult> classificationResults = new ArrayList<>();
+
     public void start() {
         tClassify();
     }
@@ -71,6 +77,9 @@ public class BodyWomanNudeClassifier {
         EuclidianClassifier buttockWorker;
         EuclidianClassifier genitalWorker;
 
+        ClassificationResult classificationResult;
+        ExecutorService executor;
+
         bodyWomanDescriptorService.openDatabase(new File(this.databaseName));
 
         BodyPartDescriptor nudeChestDescriptor = bodyWomanDescriptorService.findNudeBodyPartDescriptorByName("Chest");
@@ -83,7 +92,6 @@ public class BodyWomanNudeClassifier {
         BodyPartDescriptor notNudeGenitalDescriptor = bodyWomanDescriptorService.findNotNudeBodyPartDescriptorByName("Genital");
 
         fileList = OCIUtils.getImageFiles(this.inputDir);
-        ExecutorService executor;
 
         List<EuclidianClassifier> classifiers = new ArrayList();
 
@@ -91,13 +99,17 @@ public class BodyWomanNudeClassifier {
             startTime = System.currentTimeMillis();
 
             try {
-                System.out.println("Classifying image: ".concat(imagePath));
+                System.out.println("-------------------------------------------------------------------------------------");
+                System.out.println("Classifying image...: ".concat(imagePath));
+                System.out.println("-------------------------------------------------------------------------------------");
+
                 BufferedImage img = ImageIO.read(new File(imagePath));
-                imageProcessorService.setImage(img);
+                ImageProcessor imageProcessor = new ImageProcessor(img);
+                imageProcessorService = new ImageProcessorService(imageProcessor);
                 List<BufferedImage> partImageList = imageProcessorService.getSubImages(128);
 
                 //Create new thread pool to each image file
-                executor = Executors.newFixedThreadPool(3);
+                executor = Executors.newFixedThreadPool(10);
                 for (BufferedImage subImg : partImageList) {
 
                     chestWorker = new EuclidianClassifier(nudeChestDescriptor, notNudeChestDescriptor, subImg, this.kernelSize);
@@ -120,16 +132,15 @@ public class BodyWomanNudeClassifier {
                 while (!executor.isTerminated()) {
                 }
 
-                printResult(classifiers);
-
-                classifiers.clear();
+                classificationResult = printResult(classifiers);
+                classificationResult.setFileName(imagePath);
 
                 endTime = System.currentTimeMillis();
-                totalTime += (endTime - startTime);
 
-                System.out.println("--------------------------------------------------------");
-                System.out.println("Process time.: " + (double) ((endTime - startTime) / 1000) + " secunds.");
-                System.out.println("--------------------------------------------------------");
+                classificationResult.setExecutionTime(endTime - startTime);
+                classificationResults.add(classificationResult);
+
+                classifiers.clear();
 
             } catch (IOException ex) {
                 Logger.getLogger(BodyWomanNudeClassifier.class.getName()).log(Level.SEVERE, null, ex);
@@ -137,23 +148,24 @@ public class BodyWomanNudeClassifier {
 
         }
         System.out.println("--------------------------------------------------------");
-        System.out.println("Total time.: " + ((totalTime) / 1000) + " secunds.");
+        System.out.println("Total time.: " + (totalTime) + " ms.");
         System.out.println("--------------------------------------------------------");
-
     }
 
-    public void printResult(List<EuclidianClassifier> classifiers) {
-        double nudeChestCount = 0;
-        double nudeButtockCount = 0;
-        double nudeGenitalCount = 0;
+    public ClassificationResult printResult(List<EuclidianClassifier> classifiers) {
+        int nudeChestCount = 0;
+        int nudeButtockCount = 0;
+        int nudeGenitalCount = 0;
 
-        double notNudeChestCount = 0;
-        double notNudeButtockCount = 0;
-        double notNudeGenitalCount = 0;
+        int notNudeChestCount = 0;
+        int notNudeButtockCount = 0;
+        int notNudeGenitalCount = 0;
 
-        double maybeNudeChestCount = 0;
-        double maybeNudeButtockCount = 0;
-        double maybeNudeGenitalCount = 0;
+        int maybeNudeChestCount = 0;
+        int maybeNudeButtockCount = 0;
+        int maybeNudeGenitalCount = 0;
+
+        ClassificationResult cr = new ClassificationResult();
 
         //Comput classificarion for eath part
         for (EuclidianClassifier classification : classifiers) {
@@ -180,15 +192,25 @@ public class BodyWomanNudeClassifier {
 
         String result;
 
-        if ((nudeAvg > notNudeAvg) && (nudeAvg > maybeAvg) ) {
+        if ((nudeAvg > notNudeAvg) && (nudeAvg > maybeAvg)) {
             result = "Higth probability";
-        } else if ( (notNudeAvg > nudeAvg) && (notNudeAvg > maybeAvg)) {
+        } else if ((notNudeAvg > nudeAvg) && (notNudeAvg > maybeAvg)) {
             result = "Very low probability";
-        } else if ( (maybeAvg > nudeAvg) && (maybeAvg > notNudeAvg)) {
+        } else if ((maybeAvg > nudeAvg) && (maybeAvg > notNudeAvg)) {
             result = "Medium probability";
         } else {
             result = "Low probability";
         }
+
+        cr.setClassificationLevel(this.classificationLevel);
+        cr.setDatabaseName(databaseName);
+        cr.setDate(new Date());
+        cr.setFinalClassification(result);
+        cr.setKernelSize(kernelSize);
+        cr.setMaybeNudeAvgScore(maybeAvg);
+        cr.setNotNudeAvgScore(notNudeAvg);
+        cr.setNudeAvgScore(nudeAvg);
+
         // Result
         System.out.println("------------------- Parameters -------------------------");
         System.out.println("Database...............: " + getDatabaseName());
@@ -196,22 +218,22 @@ public class BodyWomanNudeClassifier {
         System.out.println("Classification Level...: " + getClassificationLevel());
         System.out.println(" ");
         System.out.println("------------------- Matchs results ---------------------");
-        
+
         System.out.println("***** CLASS NUDE ***** ");
         System.out.println("Chest..................: " + nudeChestCount);
         System.out.println("Buttock................: " + nudeButtockCount);
         System.out.println("Genital................: " + nudeGenitalCount);
-        
+
         System.out.println("*** CLASS MAYBE NUDE *** ");
         System.out.println("Chest..................: " + maybeNudeChestCount);
         System.out.println("Buttock................: " + maybeNudeButtockCount);
         System.out.println("Genital................: " + maybeNudeGenitalCount);
-        
+
         System.out.println("*** CLASS NOT NUDE *** ");
         System.out.println("Chest..................: " + notNudeChestCount);
         System.out.println("Buttock................: " + notNudeButtockCount);
         System.out.println("Genital................: " + notNudeGenitalCount);
-        
+
         System.out.println("*** SCORE BOARD *** ");
         System.out.println("Yes score..............: " + nudeAvg);
         System.out.println("Maybe score............: " + maybeAvg);
@@ -220,5 +242,6 @@ public class BodyWomanNudeClassifier {
         System.out.println("Nude classification....: " + result);
         System.out.println("--------------------------------------------------------");
 
+        return cr;
     }
 }

@@ -29,14 +29,18 @@ public class ImageDescriptor implements Serializable {
 
     private double[] avgChannel;
 
+    private double[] grayScaleChannel;
+
     public static final int CHANNEL_RED = 1;
     public static final int CHANNEL_GREEN = 2;
     public static final int CHANNEL_BLUE = 3;
+    public static final int GRAYSCALE_BLUE = 4;
 
-    public ImageDescriptor(double[] redChannel, double[] greenChannel, double[] blueChannel, double[] rgbChannel) {
+    public ImageDescriptor(double[] redChannel, double[] greenChannel, double[] blueChannel, double[] rgbChannel, double[] grayScaleChannel) {
         this.redChannel = redChannel;
         this.greenChannel = greenChannel;
         this.blueChannel = blueChannel;
         this.avgChannel = rgbChannel;
+        this.grayScaleChannel = grayScaleChannel;
     }
 }

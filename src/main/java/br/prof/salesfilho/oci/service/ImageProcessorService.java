@@ -10,7 +10,9 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @NoArgsConstructor
+@Getter
+@Setter
 public class ImageProcessorService {
 
     @Autowired
@@ -27,6 +31,10 @@ public class ImageProcessorService {
 
     public ImageProcessorService(BufferedImage image) {
         processor.setImage(image);
+    }
+
+    public ImageProcessorService(ImageProcessor processor) {
+        this.processor = processor;
     }
 
     public void setImage(BufferedImage image) {
@@ -41,27 +49,28 @@ public class ImageProcessorService {
         return processor.getMagnitudeAvarageFromRgbChannels(kernelSize);
     }
 
-    public double[] getAvarege(List<double[]> list) {
-        return processor.getAvarage(list);
+    public static double[] computeAgv(List<double[]> list) {
+        return ImageProcessor.computeAvg(list);
     }
-     public List<BufferedImage> getSubImages(int size) {
+
+    public List<BufferedImage> getSubImages(int size) {
         return processor.getSubImages(size);
     }
 
-    public Map<String, double[]> getImageFeaturesMap(BufferedImage img, double kernelSize) {
+    public Map<String, double[]> getImageFeaturesMap(double kernelSize) {
 
         Map<String, double[]> result = new HashMap<>();
-
-        this.setImage(img);
 
         double[] redChannelFeatures = this.getMagnitude(ImageProcessor.CHANNEL_RED, kernelSize);
         double[] greenChannelFeatures = this.getMagnitude(ImageProcessor.CHANNEL_GREEN, kernelSize);
         double[] blueChannelFeatures = this.getMagnitude(ImageProcessor.CHANNEL_BLUE, kernelSize);
+        double[] grayScaleChannelFeatures = this.getMagnitude(ImageProcessor.CHANNEL_GRAYSCALE, kernelSize);
         double[] rgbAvgFeatures = processor.getMagnitudeAvarageFromRgbChannels(kernelSize);
 
         result.put("red", redChannelFeatures);
         result.put("green", greenChannelFeatures);
         result.put("blue", blueChannelFeatures);
+        result.put("gray", grayScaleChannelFeatures);
         result.put("avg", rgbAvgFeatures);
 
         return result;

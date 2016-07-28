@@ -7,11 +7,13 @@ package br.prof.salesfilho.oci.view.console;
 
 import br.prof.salesfilho.oci.service.BodyWomanDescriptorService;
 import br.prof.salesfilho.oci.service.BodyWomanNudeClassifier;
+import br.prof.salesfilho.oci.service.ExcelService;
 import br.prof.salesfilho.oci.service.ImageNormalizerService;
-import br.prof.salesfilho.oci.service.ImageProcessorService;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
@@ -30,10 +32,10 @@ import org.springframework.stereotype.Component;
 public class Main {
 
     @Autowired
-    private BodyWomanDescriptorService bodyWomanDescriptorService;
+    private ExcelService excelService;
 
     @Autowired
-    private ImageProcessorService imageProcessorService;
+    private BodyWomanDescriptorService bodyWomanDescriptorService;
 
     @Autowired
     private ImageNormalizerService imageNormalizer;
@@ -93,7 +95,7 @@ public class Main {
             //Create new thread pool to each image file
             ExecutorService executor = Executors.newFixedThreadPool(2);
 
-            BodyWomanFeatureExtractorExecutor e1 = new BodyWomanFeatureExtractorExecutor(bodyWomanDescriptorService, imageProcessorService, true);
+            BodyWomanFeatureExtractorExecutor e1 = new BodyWomanFeatureExtractorExecutor(true);
             e1.setInputDir(this.propertySource.getProperty("inputDir").toString());
             e1.setOutputDir(this.propertySource.getProperty("outputDir").toString());
             e1.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
@@ -101,7 +103,7 @@ public class Main {
 
             executor.execute(e1);
 
-            BodyWomanFeatureExtractorExecutor e2 = new BodyWomanFeatureExtractorExecutor(bodyWomanDescriptorService, imageProcessorService, false);
+            BodyWomanFeatureExtractorExecutor e2 = new BodyWomanFeatureExtractorExecutor(false);
 
             e2.setInputDir(this.propertySource.getProperty("inputDir").toString());
             e2.setOutputDir(this.propertySource.getProperty("outputDir").toString());
@@ -114,11 +116,11 @@ public class Main {
             executor.shutdown();
             while (!executor.isTerminated()) {
             }
-            File f = new File(e1.getDatabaseName());
-            bodyWomanDescriptorService.openDatabase(f);
+            File databaseFile = new File(e1.getDatabaseName());
+            bodyWomanDescriptorService.openDatabase(databaseFile);
             bodyWomanDescriptorService.add(e1.getBodyWomanDescriptor());
             bodyWomanDescriptorService.add(e2.getBodyWomanDescriptor());
-            bodyWomanDescriptorService.save(f);
+            bodyWomanDescriptorService.save(databaseFile);
 
         } else {
             usage();
@@ -127,6 +129,9 @@ public class Main {
 
     public void classify() {
 
+        if (this.propertySource.containsProperty("classificationLavel")) {
+            bodyWomanNudeClassifier.setClassificationLevel(Integer.valueOf(this.propertySource.getProperty("classificationLevel").toString()));
+        }
         if (this.propertySource.containsProperty("inputDir")) {
             bodyWomanNudeClassifier.setInputDir(this.propertySource.getProperty("inputDir").toString());
             bodyWomanNudeClassifier.setKernelSize(Double.valueOf(this.propertySource.getProperty("kernelsize").toString()));
@@ -136,6 +141,12 @@ public class Main {
         }
         if (this.start) {
             bodyWomanNudeClassifier.start();
+            String outputFileName =  "result_" + System.currentTimeMillis() + "_" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date()) + ".xls";
+            excelService.createWorkBook();
+            excelService.setOutputFile(outputFileName);
+            excelService.createSheet("result", bodyWomanNudeClassifier.getClassificationResults());
+            excelService.save();
+            //bodyWomanNudeClassifier.get
         } else {
             usage();
         }
